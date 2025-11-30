@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/app/Lib/hooks/useAuth';
-import { LoadingOverlay } from '@/app/components/Loading';
+import { DashboardLayout } from '@/app/components/DashboardLayout';
+import { LoadingSpinner } from '@/app/components/Loading';
 import { Button } from '@/app/components/UI';
 import { showErrorToast } from '@/app/Lib/utils/toast';
 import { useRouter } from 'next/navigation';
@@ -52,24 +53,18 @@ export default function SchemesOfWorkPage() {
   };
 
   if (authLoading || loading) {
-    return <LoadingOverlay isVisible={true} message="Loading schemes of work..." />;
+    return (
+      <DashboardLayout>
+        <div className="flex justify-center items-center py-12">
+          <LoadingSpinner text="Loading schemes of work..." />
+        </div>
+      </DashboardLayout>
+    );
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link href="/dashboard" className="text-2xl font-bold text-gray-900">
-              ← Dashboard
-            </Link>
-            <h1 className="text-lg font-semibold text-gray-700">Schemes of Work</h1>
-          </div>
-        </div>
-      </nav>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-6 flex justify-between items-center">
+  const content = (
+    <>
+      <div className="mb-6 flex justify-between items-center">
           <div>
             <h2 className="text-2xl font-bold text-gray-900">My Schemes of Work</h2>
             <p className="text-gray-600">Total: {schemes.length} schemes</p>
@@ -128,7 +123,12 @@ export default function SchemesOfWorkPage() {
             ))}
           </div>
         )}
-      </main>
-    </div>
+    </>
+  );
+
+  return (
+    <DashboardLayout>
+      {content}
+    </DashboardLayout>
   );
 }

@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/app/Lib/hooks/useAuth';
-import { LoadingOverlay, Skeleton } from '@/app/components/Loading';
+import { DashboardLayout } from '@/app/components/DashboardLayout';
+import { LoadingSpinner, Skeleton } from '@/app/components/Loading';
 import { Button } from '@/app/components/UI';
 import { showErrorToast } from '@/app/Lib/utils/toast';
 import { getUserLessonPlans } from '@/app/Lib/firebase/firestore';
@@ -51,43 +52,37 @@ export default function LessonPlansPage() {
   };
 
   if (authLoading || loading) {
-    return <LoadingOverlay isVisible={true} message="Loading lesson plans..." />;
+    return (
+      <DashboardLayout>
+        <div className="flex justify-center items-center py-12">
+          <LoadingSpinner text="Loading lesson plans..." />
+        </div>
+      </DashboardLayout>
+    );
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link href="/dashboard" className="text-2xl font-bold text-gray-900">
-              ← Dashboard
-            </Link>
-            <h1 className="text-lg font-semibold text-gray-700">Lesson Plans</h1>
-          </div>
+  const content = (
+    <>
+      <div className="mb-6 flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">My Lesson Plans</h2>
+          <p className="text-gray-600">Total: {lessonPlans.length} lesson plans</p>
         </div>
-      </nav>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-6 flex justify-between items-center">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">My Lesson Plans</h2>
-            <p className="text-gray-600">Total: {lessonPlans.length} lesson plans</p>
-          </div>
-          <div className="flex gap-3">
-            <Link href="/reb-lesson-plan">
-              <Button variant="primary">+ REB Plan</Button>
-            </Link>
-            <Link href="/rtb-session-plan">
-              <Button variant="primary">+ RTB Plan</Button>
-            </Link>
-            <Link href="/nursery-lesson-plan">
-              <Button variant="primary">+ Nursery Plan</Button>
-            </Link>
-          </div>
+        <div className="flex gap-3">
+          <Link href="/reb-lesson-plan">
+            <Button variant="primary">+ REB Plan</Button>
+          </Link>
+          <Link href="/rtb-session-plan">
+            <Button variant="primary">+ RTB Plan</Button>
+          </Link>
+          <Link href="/nursery-lesson-plan">
+            <Button variant="primary">+ Nursery Plan</Button>
+          </Link>
         </div>
+      </div>
 
-        {lessonPlans.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-12 text-center">
+      {lessonPlans.length === 0 ? (
+            <div className="bg-white rounded-lg shadow p-12 text-center">
             <p className="text-gray-500 text-lg mb-4">No lesson plans yet</p>
             <p className="text-gray-400 mb-6">Create your first lesson plan to get started</p>
             <div className="flex gap-3 justify-center flex-wrap">
@@ -105,7 +100,7 @@ export default function LessonPlansPage() {
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {lessonPlans.map(plan => (
-              <div
+                <div
                 key={plan.id}
                 className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow p-6"
               >
@@ -143,7 +138,12 @@ export default function LessonPlansPage() {
             ))}
           </div>
         )}
-      </main>
-    </div>
+    </>
+  );
+
+  return (
+    <DashboardLayout>
+      {content}
+    </DashboardLayout>
   );
 }
