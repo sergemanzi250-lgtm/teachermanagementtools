@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { getUserLessonPlans, getUserQuizzes } from '@/app/Lib/firebase/firestore';
 import { showErrorToast } from '@/app/Lib/utils/toast';
+import { LoadingSpinner } from '@/app/components/Loading';
 
 interface Stats {
   lessonPlans: number;
@@ -35,48 +36,6 @@ export default function UserDashboard() {
       router.push('/signin');
     }
   }, [authLoading, user, router]);
-
-  useEffect(() => {
-    async function loadData() {
-      if (!user?.id) return;
-
-      try {
-        setIsLoading(true);
-        const plans = await getUserLessonPlans(user.id, 10);
-        const quizzes = await getUserQuizzes(user.id);
-        
-        // Calculate stats efficiently
-        const now = new Date();
-        const thisMonthPlans = plans.filter((p: any) => {
-          const planDate = new Date(p.createdAt);
-          return planDate.getMonth() === now.getMonth() && planDate.getFullYear() === now.getFullYear();
-        }).length;
-
-        setStats({
-          lessonPlans: plans.length,
-          quizzes: quizzes.length,
-          rubrics: 0,
-          thisMonth: thisMonthPlans,
-        });
-
-        setRecentPlansData(plans.slice(0, 5));
-      } catch (error) {
-        showErrorToast('Failed to load dashboard data');
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    loadData();
-  }, [user?.id]);
-
-  if (authLoading || isLoading) {
-    return null;
-  }
-
-  if (!user) {
-    return null;
-  }
 
   // Memoize stats configuration to prevent recalculation
   const statsList = useMemo(() => [
@@ -160,6 +119,64 @@ export default function UserDashboard() {
       color: 'indigo',
     },
   ], []);
+
+  useEffect(() => {
+    async function loadData() {
+      if (!user?.id) return;
+
+      try {
+        setIsLoading(true);
+        const plans = await getUserLessonPlans(user.id, 10);
+        const quizzes = await getUserQuizzes(user.id);
+        
+        // Calculate stats efficiently
+        const now = new Date();
+        const thisMonthPlans = plans.filter((p: any) => {
+          const planDate = new Date(p.createdAt);
+          return planDate.getMonth() === now.getMonth() && planDate.getFullYear() === now.getFullYear();
+        }).length;
+
+        setStats({
+          lessonPlans: plans.length,
+          quizzes: quizzes.length,
+          rubrics: 0,
+          thisMonth: thisMonthPlans,
+        });
+
+        setRecentPlansData(plans.slice(0, 5));
+      } catch (error) {
+        showErrorToast('Failed to load dashboard data');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadData();
+  }, [user?.id]);
+
+  if (authLoading) {
+    return (
+      <DashboardLayout>
+        <div className="flex justify-center items-center py-12">
+          <LoadingSpinner text="Loading dashboard..." />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
+
+  if (isLoading) {
+    return (
+      <DashboardLayout>
+        <div className="flex justify-center items-center py-12">
+          <LoadingSpinner text="Loading your data..." />
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   const dashboardContent = (
     <>
