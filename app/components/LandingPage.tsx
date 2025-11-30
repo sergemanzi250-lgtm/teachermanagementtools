@@ -1,9 +1,34 @@
 import Link from "next/link";
 import { Menu, X, Globe, BookOpen, Clock, Target } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/Lib/hooks/useAuth";
 
 export default function LandingPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, isAuthenticated, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isAuthenticated && !loading) {
+      router.push("/dashboard");
+    }
+  }, [isAuthenticated, loading, router]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-blue-300 border-r-blue-600"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isAuthenticated) {
+    return null; // Will redirect via useEffect
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -95,7 +120,7 @@ export default function LandingPage() {
       </nav>
 
       {/* Trust Badge */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 py-4 text-center">
+      <div className="bg-linear-to-r from-blue-50 to-indigo-50 py-4 text-center">
         <p className="text-sm font-medium text-gray-700">
           ✓ Trusted by 30,000+ Rwandan teachers
         </p>
@@ -171,7 +196,7 @@ export default function LandingPage() {
           </div>
 
           <div className="relative">
-            <div className="bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg p-6 shadow-lg">
+            <div className="bg-linear-to-br from-blue-100 to-indigo-100 rounded-lg p-6 shadow-lg">
               <div className="bg-white rounded-lg p-4 shadow-md">
                 <div className="text-gray-500 text-sm font-mono mb-2">LESSON PLAN</div>
                 <div className="space-y-2">
@@ -188,7 +213,7 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section className="bg-gradient-to-b from-gray-50 to-white py-16 md:py-24">
+      <section className="bg-linear-to-b from-gray-50 to-white py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-4">
             AI-Powered Professional Lesson Planning for Rwanda Teachers
@@ -352,7 +377,7 @@ export default function LandingPage() {
       </section>
 
       {/* Features Highlights */}
-      <section className="py-16 md:py-24 bg-gradient-to-b from-gray-50 to-white">
+      <section className="py-16 md:py-24 bg-linear-to-b from-gray-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-4">
             Perfect for Rwanda Teachers
@@ -468,7 +493,7 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-indigo-600">
+      <section className="py-20 bg-linear-to-r from-blue-600 to-indigo-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
             Ready to Transform Your Teaching in Rwanda?
