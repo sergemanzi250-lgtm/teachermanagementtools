@@ -57,7 +57,7 @@ export function UserMenu() {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors"
       >
-        <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full text-white font-semibold text-sm">
+        <div className="flex items-center justify-center w-8 h-8 bg-linear-to-br from-blue-500 to-indigo-600 rounded-full text-white font-semibold text-sm">
           {user.displayName?.charAt(0).toUpperCase() || 'U'}
         </div>
         <div className="hidden sm:block">
