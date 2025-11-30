@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useEffect, useState, ReactNode, useMemo } from 'react';
 import {
   User as FirebaseUser,
   onAuthStateChanged,
@@ -76,13 +76,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  const value: AuthContextType = {
-    user,
-    firebaseUser,
-    loading,
-    isAuthenticated: !!user,
-    signOut,
-  };
+  // Memoize context value to prevent unnecessary re-renders of consumers
+  const value: AuthContextType = useMemo(
+    () => ({
+      user,
+      firebaseUser,
+      loading,
+      isAuthenticated: !!user,
+      signOut,
+    }),
+    [user, firebaseUser, loading]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
