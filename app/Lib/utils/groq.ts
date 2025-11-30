@@ -1,8 +1,17 @@
 import Groq from 'groq-sdk';
 
-const groq = new Groq({
-  apiKey: process.env.NEXT_PUBLIC_GROQ_API_KEY,
-});
+// Lazy-initialize Groq client to avoid build-time errors
+let groqClient: Groq | null = null;
+
+const getGroqClient = (): Groq => {
+  if (!groqClient) {
+    const apiKey = process.env.NEXT_PUBLIC_GROQ_API_KEY || process.env.GROQ_API_KEY;
+    groqClient = new Groq({
+      apiKey,
+    });
+  }
+  return groqClient;
+};
 
 export const GROQ_CONFIG = {
   model: 'llama3-70b-8192',
@@ -241,6 +250,7 @@ Ensure the activity is:
 // Main generation function
 export async function generateWithGroq(prompt: string): Promise<string> {
   try {
+    const groq = getGroqClient();
     const message = await groq.chat.completions.create({
       messages: [
         {

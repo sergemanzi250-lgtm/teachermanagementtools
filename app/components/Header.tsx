@@ -28,7 +28,7 @@ export function Header({ onMenuClick }: HeaderProps) {
             </button>
 
             <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">
+              <div className="w-8 h-8 bg-linear-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">
                 M
               </div>
               <span className="hidden sm:block font-bold text-xl text-gray-900">Mwalimu Tools</span>
