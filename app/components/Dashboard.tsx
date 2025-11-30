@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useAuth } from '@/app/Lib/hooks/useAuth';
 import { getUserLessonPlans } from '@/app/Lib/firebase/firestore';
 import { Card, CardHeader, Badge, Button } from './UI';
@@ -14,16 +14,35 @@ interface DashboardItemProps {
   createdAt: Date;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
-  onExport?: (id: string) => void;
+  onExport?: (id: string, data?: Record<string, unknown>) => void;
 }
 
-export function DashboardItem({ id, title, format, createdAt, onEdit, onDelete, onExport }: DashboardItemProps) {
-  const formatBadgeVariant = format === 'REB' ? 'info' : format === 'RTB' ? 'success' : 'warning';
-  const formattedDate = new Date(createdAt).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
+export const DashboardItem = React.memo(function DashboardItem({ 
+  id, 
+  title, 
+  format, 
+  createdAt, 
+  onEdit, 
+  onDelete, 
+  onExport 
+}: DashboardItemProps) {
+  const formatBadgeVariant = useMemo(() => 
+    format === 'REB' ? 'info' : format === 'RTB' ? 'success' : 'warning',
+    [format]
+  );
+
+  const formattedDate = useMemo(() => 
+    new Date(createdAt).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    }),
+    [createdAt]
+  );
+
+  const handleEdit = useCallback(() => onEdit?.(id), [id, onEdit]);
+  const handleDelete = useCallback(() => onDelete?.(id), [id, onDelete]);
+  const handleExport = useCallback(() => onExport?.(id, undefined), [id, onExport]);
 
   return (
     <Card hover className="mb-4">
@@ -40,7 +59,7 @@ export function DashboardItem({ id, title, format, createdAt, onEdit, onDelete, 
             <Button
               variant="secondary"
               size="small"
-              onClick={() => onEdit(id)}
+              onClick={handleEdit}
             >
               Edit
             </Button>
@@ -49,7 +68,7 @@ export function DashboardItem({ id, title, format, createdAt, onEdit, onDelete, 
             <Button
               variant="success"
               size="small"
-              onClick={() => onExport(id)}
+              onClick={handleExport}
             >
               Export
             </Button>
@@ -58,7 +77,7 @@ export function DashboardItem({ id, title, format, createdAt, onEdit, onDelete, 
             <Button
               variant="danger"
               size="small"
-              onClick={() => onDelete(id)}
+              onClick={handleDelete}
             >
               Delete
             </Button>
@@ -67,7 +86,7 @@ export function DashboardItem({ id, title, format, createdAt, onEdit, onDelete, 
       </div>
     </Card>
   );
-}
+});
 
 interface DashboardListProps {
   collectionName: string;
@@ -75,10 +94,10 @@ interface DashboardListProps {
   fetchFunction: (userId: string) => Promise<Record<string, unknown>[]>;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
-  onExport?: (id: string, data: Record<string, unknown>) => void;
+  onExport?: (id: string) => void;
 }
 
-export function DashboardList({
+export const DashboardList = React.memo(function DashboardList({
   title,
   fetchFunction,
   onEdit,
@@ -88,6 +107,8 @@ export function DashboardList({
   const { user } = useAuth();
   const [items, setItems] = useState<Record<string, unknown>[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     async function loadItems() {
@@ -106,6 +127,30 @@ export function DashboardList({
 
     loadItems();
   }, [user?.id, fetchFunction]);
+
+  // Memoize paginated items
+  const paginatedItems = useMemo(() => {
+    const startIdx = (page - 1) * itemsPerPage;
+    return items.slice(startIdx, startIdx + itemsPerPage);
+  }, [items, page]);
+
+  // Memoize total pages
+  const totalPages = useMemo(() => 
+    Math.ceil(items.length / itemsPerPage),
+    [items.length]
+  );
+
+  const handleEdit = useCallback((id: string) => {
+    onEdit?.(id);
+  }, [onEdit]);
+
+  const handleDelete = useCallback((id: string) => {
+    onDelete?.(id);
+  }, [onDelete]);
+
+  const handleExport = useCallback((id: string) => {
+    onExport?.(id);
+  }, [onExport]);
 
   if (isLoading) {
     return (
@@ -130,21 +175,44 @@ export function DashboardList({
     <div>
       <h3 className="text-2xl font-bold mb-6">{title}</h3>
       <div>
-        {items.map((item) => (
+        {paginatedItems.map((item) => (
           <DashboardItem
             key={item.id as string}
             id={item.id as string}
             title={(item.title || item.subject || 'Untitled') as string}
             format={(item.format || 'Standard') as string}
             createdAt={item.createdAt ? new Date(item.createdAt as string) : new Date()}
-            onEdit={onEdit}
-            onDelete={() => onDelete && onDelete(item.id as string)}
-            onExport={() => onExport && onExport(item.id as string, item)}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onExport={handleExport}
           />
         ))}
       </div>
+      
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex justify-center gap-2 mt-6">
+          <button
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="px-4 py-2 bg-gray-200 disabled:opacity-50 rounded hover:bg-gray-300 transition-colors"
+          >
+            Previous
+          </button>
+          <span className="px-4 py-2 text-gray-600">
+            Page {page} of {totalPages}
+          </span>
+          <button
+            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+            className="px-4 py-2 bg-gray-200 disabled:opacity-50 rounded hover:bg-gray-300 transition-colors"
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
-}
+});
 
 export default DashboardList;

@@ -70,11 +70,7 @@ export default function SchemeOfWorkGeneratorPage() {
     }
   };
 
-  if (authLoading) {
-    return <LoadingOverlay isVisible={true} message="Loading..." />;
-  }
-
-  if (!user) {
+  if (authLoading || !user) {
     return null;
   }
 

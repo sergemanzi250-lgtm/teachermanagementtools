@@ -9,12 +9,9 @@ interface AuthLoadingProps {
 
 export function AuthLoading({ message = 'Loading...', fullScreen = false }: AuthLoadingProps) {
   const content = (
-    <div className="flex flex-col items-center justify-center gap-4">
-      <div className="relative w-16 h-16">
-        <div className="absolute inset-0 bg-linear-to-r from-blue-500 to-indigo-600 rounded-full opacity-10 animate-pulse"></div>
-        <Loader className="absolute inset-0 text-blue-600 animate-spin" size={40} />
-      </div>
-      <p className="text-gray-600 font-medium text-center">{message}</p>
+    <div className="flex flex-col items-center justify-center gap-3">
+      <Loader className="text-blue-600 animate-spin" size={32} style={{ animationDuration: '0.6s' }} />
+      <p className="text-gray-600 text-sm font-medium text-center">{message}</p>
     </div>
   );
 
@@ -27,7 +24,7 @@ export function AuthLoading({ message = 'Loading...', fullScreen = false }: Auth
   }
 
   return (
-    <div className="flex items-center justify-center py-12">
+    <div className="flex items-center justify-center py-8">
       {content}
     </div>
   );
