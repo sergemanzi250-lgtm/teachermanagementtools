@@ -77,6 +77,8 @@ export default function RubricGeneratorPage() {
     assignmentDescription: { label: 'Assignment Description', type: 'textarea' as const, required: true, placeholder: 'Describe the assignment' },
     skills: { label: 'Skills to Assess', type: 'textarea' as const, required: true, placeholder: 'List skills separated by commas' },
     performanceLevels: { label: 'Number of Performance Levels (3-6)', type: 'number' as const, placeholder: '4' },
+    className: { label: 'Class Name', placeholder: 'e.g., Grade 5A' },
+    assignmentName: { label: 'Assignment Name', placeholder: 'e.g., Research Project' },
   };
 
   return (

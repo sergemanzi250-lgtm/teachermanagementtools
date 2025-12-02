@@ -88,7 +88,9 @@ export default function QuizGeneratorPage() {
       ]
     },
     questionTypes: { label: 'Question Types', type: 'textarea' as const, placeholder: 'e.g., Multiple choice, True/False' },
-    targetAudience: { label: 'Target Audience', placeholder: 'e.g., P4 Students' },
+    className: { label: 'Class Name', placeholder: 'e.g., Grade 5A' },
+    learningObjectives: { label: 'Learning Objectives', placeholder: 'e.g., Students will understand...' },
+    additionalNotes: { label: 'Additional Notes', placeholder: 'Any special instructions or considerations...' },
   };
 
   return (

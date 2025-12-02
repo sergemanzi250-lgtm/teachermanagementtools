@@ -79,6 +79,10 @@ export default function SchemeOfWorkGeneratorPage() {
     grade: { label: 'Grade/Level', required: true, placeholder: 'e.g., Grade 6' },
     weeks: { label: 'Number of Weeks', type: 'number' as const, required: true, placeholder: '12' },
     topics: { label: 'Topics to Include', type: 'textarea' as const, required: true, placeholder: 'List topics separated by commas' },
+    term: { label: 'Term', placeholder: 'e.g., Term 1' },
+    className: { label: 'Class Name', placeholder: 'e.g., Grade 6A' },
+    additionalNotes: { label: 'Additional Notes', placeholder: 'Any special considerations...' },
+    competencies: { label: 'Key Competencies', placeholder: 'e.g., Problem-solving, critical thinking...' },
   };
 
   return (
