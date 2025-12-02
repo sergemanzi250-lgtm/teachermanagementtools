@@ -1,14 +1,25 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Loader } from 'lucide-react';
+import { useAuth } from '@/app/Lib/hooks/useAuth';
+import { showSuccessToast, showErrorToast } from '@/app/Lib/utils/toast';
 import type { RtbSessionPlanInput } from '@/app/Lib/types/type';
 
 export default function RtbSessionPlanPage() {
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/signin');
+    }
+  }, [authLoading, user, router]);
   const [formData, setFormData] = useState<Partial<RtbSessionPlanInput>>({
     duration: 60,
     sessionNumber: 1,
@@ -28,6 +39,10 @@ export default function RtbSessionPlanPage() {
     setLoading(true);
 
     try {
+      if (!user?.id) {
+        throw new Error('User not authenticated');
+      }
+
       if (!formData.schoolName || !formData.courseTitle || !formData.instructorName) {
         throw new Error('Please fill in all required fields');
       }
@@ -37,6 +52,7 @@ export default function RtbSessionPlanPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
+          userId: user.id,
           format: 'RTB',
         }),
       });
@@ -47,39 +63,46 @@ export default function RtbSessionPlanPage() {
         throw new Error(data.error || 'Failed to generate session plan');
       }
 
+      showSuccessToast('Session plan generated successfully!');
       setSuccess(true);
       setTimeout(() => {
         setFormData({ duration: 60, sessionNumber: 1 });
         setSuccess(false);
       }, 2000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+      setError(errorMessage);
+      showErrorToast(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
+  if (authLoading || !user) {
+    return null;
+  }
+
   return (
-    <div className="min-h-screen bg-linear-to-br from-purple-50 to-indigo-50">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <Link href="/" className="flex items-center gap-2 text-purple-600 hover:text-purple-700 font-medium">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <Link href="/dashboard" className="flex items-center gap-2 text-purple-600 hover:text-purple-700 font-medium">
             <ArrowLeft size={20} />
-            Back to Home
+            Back to Dashboard
           </Link>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">RTB Session Plan Generator</h1>
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="bg-white rounded-xl shadow p-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Create RTB TVET Session Plan</h1>
           <p className="text-gray-600 mb-8">
-            Generate an AI-powered session plan aligned with Rwanda TVET Board standards
+            A RTB-certified Session Plan is designed to provide structured teaching and learning processes for TVET learners
           </p>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-8">
             {/* Success Message */}
             {success && (
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
@@ -95,259 +118,243 @@ export default function RtbSessionPlanPage() {
             )}
 
             {/* Institution Information */}
-            <div className="border-b border-gray-200 pb-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Institution Information</h2>
-
-              <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h2>
+              <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    School/Training Center Name *
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Sector</label>
                   <input
                     type="text"
-                    name="schoolName"
-                    value={formData.schoolName || ''}
+                    name="sector"
+                    value={formData.sector || ''}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="Enter institution name"
-                    required
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-gray-900"
+                    placeholder="e.g., Hospitality/Security Services"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Instructor Name *
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Trade</label>
+                  <input
+                    type="text"
+                    name="trade"
+                    value={formData.trade || ''}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-gray-900"
+                    placeholder="e.g., Food and Beverage Services"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Level</label>
+                  <input
+                    type="text"
+                    name="level"
+                    value={formData.level || ''}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-gray-900"
+                    placeholder="e.g., Level 3"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                  <input
+                    type="date"
+                    name="date"
+                    value={formData.date || ''}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-gray-900"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Teacher Name</label>
                   <input
                     type="text"
                     name="instructorName"
                     value={formData.instructorName || ''}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="Your name"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-gray-900"
+                    placeholder="e.g., Alex Umbugara"
                     required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Module Title</label>
+                  <input
+                    type="text"
+                    name="moduleTitle"
+                    value={formData.moduleTitle || ''}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-gray-900"
+                    placeholder="e.g., Food and Beverage Service Operations"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Week</label>
+                  <input
+                    type="text"
+                    name="week"
+                    value={formData.week || ''}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-gray-900"
+                    placeholder="e.g., Week 4"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Class Size</label>
+                  <input
+                    type="number"
+                    name="classSize"
+                    value={formData.classSize || ''}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-gray-900"
+                    placeholder="e.g., 25"
+                    min="1"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Class Name</label>
+                  <input
+                    type="text"
+                    name="className"
+                    value={formData.className || ''}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-gray-900"
+                    placeholder="e.g., H/B-L3A"
                   />
                 </div>
               </div>
             </div>
 
             {/* Course Information */}
-            <div className="border-b border-gray-200 pb-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Course Information</h2>
-
-              <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Topic and Learning Outcomes</h2>
+              <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Course Title *
-                  </label>
-                  <input
-                    type="text"
-                    name="courseTitle"
-                    value={formData.courseTitle || ''}
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Topic of Session</label>
+                  <textarea
+                    name="topicOfSession"
+                    value={formData.topicOfSession || ''}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="e.g., Automotive Repair"
-                    required
+                    rows={2}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-gray-900"
+                    placeholder="e.g., Table Setting, Preparation..."
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Course Code
-                  </label>
-                  <input
-                    type="text"
-                    name="courseCode"
-                    value={formData.courseCode || ''}
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Learning Outcomes</label>
+                  <textarea
+                    name="learningOutcomes"
+                    value={formData.learningOutcomes || ''}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="e.g., AUTO-101"
+                    rows={3}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-gray-900"
+                    placeholder="e.g., Demonstrate proper table setting and service techniques..."
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Session Number
-                  </label>
-                  <input
-                    type="number"
-                    name="sessionNumber"
-                    value={formData.sessionNumber || 1}
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Indicative Content</label>
+                  <textarea
+                    name="indicativeContent"
+                    value={formData.indicativeContent || ''}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    min="1"
+                    rows={2}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-gray-900"
+                    placeholder="e.g., Client budget, tips, local dishes, service equipment..."
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Duration (minutes)
-                  </label>
-                  <input
-                    type="number"
-                    name="duration"
-                    value={formData.duration || 60}
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Range</label>
+                  <textarea
+                    name="range"
+                    value={formData.range || ''}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    min="30"
-                    max="180"
+                    rows={2}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-gray-900"
+                    placeholder="e.g., From preparing the guest list to ensuring the menu is executed..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Facilitation Technique</label>
+                  <textarea
+                    name="facilitationTechnique"
+                    value={formData.facilitationTechnique || ''}
+                    onChange={handleChange}
+                    rows={2}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-gray-900"
+                    placeholder="e.g., Brainstorming, Guided Discovery, Simulation, Experimental Learning, Simile"
                   />
                 </div>
               </div>
             </div>
 
             {/* Session Learning Objectives */}
-            <div className="border-b border-gray-200 pb-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Learning Objectives</h2>
-
-              <div className="space-y-4">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Language and Duration</h2>
+              <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Session Objective
-                  </label>
-                  <textarea
-                    name="sessionObjective"
-                    value={formData.sessionObjective || ''}
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Language/Usumu/Langue/Lughe</label>
+                  <select
+                    name="language"
+                    value={formData.language || 'English'}
                     onChange={handleChange}
-                    rows={3}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="What should learners achieve in this session?"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-gray-900"
+                  >
+                    <option value="English">English</option>
+                    <option value="French">French</option>
+                    <option value="Kinyarwanda">Kinyarwanda</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Duration (minutes)</label>
+                  <input
+                    type="number"
+                    name="duration"
+                    value={formData.duration || 60}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-gray-900"
+                    min="30"
+                    max="180"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Key Competencies
-                  </label>
-                  <textarea
-                    name="keyCompetencies"
-                    value={formData.keyCompetencies || ''}
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Number of Development Steps</label>
+                  <input
+                    type="number"
+                    name="numberOfDevelopmentSteps"
+                    value={formData.numberOfDevelopmentSteps || 4}
                     onChange={handleChange}
-                    rows={3}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="List the key competencies"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Session Outcome
-                  </label>
-                  <textarea
-                    name="sessionOutcome"
-                    value={formData.sessionOutcome || ''}
-                    onChange={handleChange}
-                    rows={3}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="Expected outcome at end of session"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Practical Activities & Equipment */}
-            <div className="border-b border-gray-200 pb-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Practical Activities & Equipment</h2>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Practical Activities
-                  </label>
-                  <textarea
-                    name="practicalActivities"
-                    value={formData.practicalActivities || ''}
-                    onChange={handleChange}
-                    rows={3}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="Describe hands-on activities"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Equipment Required
-                  </label>
-                  <textarea
-                    name="equipmentRequired"
-                    value={formData.equipmentRequired || ''}
-                    onChange={handleChange}
-                    rows={3}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="List all required equipment and materials"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Safety Considerations
-                  </label>
-                  <textarea
-                    name="safetyConsiderations"
-                    value={formData.safetyConsiderations || ''}
-                    onChange={handleChange}
-                    rows={3}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="Important safety considerations"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Assessment & Reflection */}
-            <div className="pb-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Assessment & Reflection</h2>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Assessment Method
-                  </label>
-                  <textarea
-                    name="assessmentMethod"
-                    value={formData.assessmentMethod || ''}
-                    onChange={handleChange}
-                    rows={2}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="How will you assess learners?"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Assessment Criteria
-                  </label>
-                  <textarea
-                    name="assessmentCriteria"
-                    value={formData.assessmentCriteria || ''}
-                    onChange={handleChange}
-                    rows={2}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="What are the success criteria?"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-gray-900"
+                    min="1"
                   />
                 </div>
               </div>
             </div>
 
             {/* Submit Button */}
-            <div className="flex gap-4">
+            <div className="flex gap-4 pt-4">
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors disabled:bg-purple-400 disabled:cursor-not-allowed"
+                className="px-6 py-2 bg-gray-700 text-white rounded-lg font-semibold hover:bg-gray-800 transition-colors disabled:bg-gray-400"
               >
-                {loading ? (
-                  <>
-                    <Loader size={20} className="animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  'Generate AI Session Plan'
-                )}
+                {loading ? 'Generating...' : 'generate'}
               </button>
               <Link
                 href="/"
-                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
               >
                 Cancel
               </Link>
@@ -358,3 +365,4 @@ export default function RtbSessionPlanPage() {
     </div>
   );
 }
+

@@ -82,7 +82,7 @@ export function ReusableForm<T extends FieldValues>({
                         id={fieldName}
                         placeholder={config.placeholder}
                         rows={config.rows || 4}
-                        className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 ${
                           errorMessage ? 'border-red-500' : 'border-gray-300'
                         }`}
                       />
@@ -97,7 +97,7 @@ export function ReusableForm<T extends FieldValues>({
                       <select
                         {...field}
                         id={fieldName}
-                        className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 ${
                           errorMessage ? 'border-red-500' : 'border-gray-300'
                         }`}
                       >
@@ -140,7 +140,7 @@ export function ReusableForm<T extends FieldValues>({
                       type={config.type || 'text'}
                       id={fieldName}
                       placeholder={config.placeholder}
-                      className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 ${
                         errorMessage ? 'border-red-500' : 'border-gray-300'
                       }`}
                     />

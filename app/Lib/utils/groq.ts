@@ -14,9 +14,10 @@ const getGroqClient = (): Groq => {
 };
 
 export const GROQ_CONFIG = {
-  model: 'llama3-70b-8192',
+  model: 'llama-3.3-70b-versatile',
   temperature: 0.4,
-  max_tokens: 4096,
+  max_tokens: 2048,
+  stop: ['\n\n\n', '###'],
 };
 
 // Lesson Plan Prompt Templates

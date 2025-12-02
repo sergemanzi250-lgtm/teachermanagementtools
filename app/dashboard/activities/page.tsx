@@ -41,9 +41,24 @@ export default function ActivitiesPage() {
     
     setLoading(true);
     try {
-      const { getUserActivities } = await import('@/app/Lib/firebase/firestore');
-      const data = await getUserActivities(user.id);
-      setActivities(data as unknown as Activity[]);
+      const response = await fetch(`/api/get-activities?userId=${user.id}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        // Transform the data to match expected format
+        const transformedActivities = data.data.map((activity: any) => ({
+          id: activity.id,
+          title: activity.title || activity.activityTitle || 'Untitled Activity',
+          subject: activity.subject || 'No subject',
+          activityType: activity.activityType || activity.type || 'General',
+          gradeLevel: activity.gradeLevel || activity.className || 'No grade',
+          duration: activity.duration || activity.timeAllocation || 30,
+          createdAt: activity.createdAt,
+        }));
+        setActivities(transformedActivities as Activity[]);
+      } else {
+        throw new Error(data.error || 'Failed to fetch activities');
+      }
     } catch (error) {
       showErrorToast('Failed to load activities');
       console.error(error);

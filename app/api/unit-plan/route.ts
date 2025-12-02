@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { saveUnitPlan, updateDocument, deleteDocument, getDocument, getUserDocuments, COLLECTIONS } from '@/app/Lib/firebase/firestore';
+import { generateWithGroq, parseJsonFromResponse } from '@/app/Lib/utils/groq';
+import { saveUnitPlanMongo, updateDocumentMongo, deleteDocumentMongo, getDocumentMongo, getUserDocumentsMongo, COLLECTIONS } from '@/app/Lib/mongodb/mongodbAdmin';
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,16 +21,41 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Generate AI content for unit plan
+    const prompt = `Create a comprehensive unit plan with the following specifications:
+
+Title: ${title}
+Duration: ${duration} weeks
+Competencies to Develop: ${competencies}
+${content ? `Content Overview: ${content}` : ''}
+
+Please generate a detailed unit plan that includes:
+1. Unit Overview
+2. Learning Objectives aligned with the competencies
+3. Weekly Breakdown (${duration} weeks)
+4. Assessment Methods
+5. Resources Needed
+6. Learning Activities
+7. Differentiation Strategies for different learner needs
+8. Cross-Cutting Issues Integration (Gender, Inclusion, Environment, etc.)
+9. Teacher Guidance Notes
+
+Ensure the unit plan is practical, implementable, and aligned with Rwanda's education standards.`;
+
+    const generatedContent = await generateWithGroq(prompt);
+    const parsedContent = parseJsonFromResponse(generatedContent);
+
     const unitPlanData = {
       title,
       duration,
       competencies,
-      content: content || '',
+      content: generatedContent,
+      parsed: parsedContent,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
-    const docId = await saveUnitPlan(userId, unitPlanData);
+    const docId = await saveUnitPlanMongo(userId, unitPlanData);
 
     return NextResponse.json(
       {
@@ -38,16 +64,16 @@ export async function POST(request: NextRequest) {
           id: docId,
           ...unitPlanData,
         },
-        message: 'Unit plan saved successfully',
+        message: 'Unit plan generated successfully',
       },
       { status: 201 }
     );
   } catch (error) {
-    console.error('Error in save-unit-plan route:', error);
+    console.error('Error in unit-plan route:', error);
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to save unit plan',
+        error: error instanceof Error ? error.message : 'Failed to generate unit plan',
       },
       { status: 500 }
     );
@@ -69,7 +95,7 @@ export async function GET(request: NextRequest) {
 
     if (planId) {
       // Get specific plan
-      const plan = await getDocument(COLLECTIONS.UNIT_PLANS, planId);
+      const plan = await getDocumentMongo(COLLECTIONS.UNIT_PLANS, planId);
       return NextResponse.json(
         {
           success: true,
@@ -80,7 +106,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get all plans for user
-    const plans = await getUserDocuments(COLLECTIONS.UNIT_PLANS, userId);
+    const plans = await getUserDocumentsMongo(COLLECTIONS.UNIT_PLANS, userId);
     return NextResponse.json(
       {
         success: true,
@@ -112,7 +138,7 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    await updateDocument(COLLECTIONS.UNIT_PLANS, planId, updates);
+    await updateDocumentMongo(COLLECTIONS.UNIT_PLANS, planId, updates);
 
     return NextResponse.json(
       {
@@ -145,7 +171,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    await deleteDocument(COLLECTIONS.UNIT_PLANS, planId);
+    await deleteDocumentMongo(COLLECTIONS.UNIT_PLANS, planId);
 
     return NextResponse.json(
       {

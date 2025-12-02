@@ -41,8 +41,23 @@ export default function LessonPlansPage() {
     
     setLoading(true);
     try {
-      const plans = await getUserLessonPlans(user.id);
-      setLessonPlans(plans as unknown as LessonPlan[]);
+      const response = await fetch(`/api/get-lesson-plans?userId=${user.id}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        // Transform the data to match expected format
+        const plans = data.data.map((plan: any) => ({
+          id: plan.id,
+          title: plan.title || plan.lessonTitle || 'Untitled Lesson Plan',
+          subject: plan.subject || 'No subject',
+          className: plan.className || plan.class || 'No class',
+          format: plan.format || 'Unknown',
+          createdAt: plan.createdAt,
+        }));
+        setLessonPlans(plans as LessonPlan[]);
+      } else {
+        throw new Error(data.error || 'Failed to fetch lesson plans');
+      }
     } catch (error) {
       showErrorToast('Failed to load lesson plans');
       console.error(error);

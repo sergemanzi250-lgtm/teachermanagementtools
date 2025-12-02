@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateRubric, parseJsonFromResponse } from '@/app/Lib/utils/groq';
-import { saveRubric } from '@/app/Lib/firebase/firestore';
+import { generateRubricPrompt, validatePromptInput } from '@/app/Lib/utils/prompts';
+import { generateWithGroq, parseJsonFromResponse } from '@/app/Lib/utils/groq';
+import { saveRubricMongo } from '@/app/Lib/mongodb/mongodbAdmin';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { userId, assignmentDescription, skills, performanceLevels } = body;
+    const { userId, assignmentDescription, skills, performanceLevels, className, assignmentName } = body;
 
     if (!userId) {
       return NextResponse.json(
@@ -21,24 +22,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const generatedContent = await generateRubric({
-      assignmentDescription,
-      skills,
-      performanceLevels,
+    // Generate prompt using prompt system
+    const prompt = generateRubricPrompt({
+      assignmentName: assignmentName || 'Assignment',
+      className: className || 'General',
+      skills: Array.isArray(skills) ? skills : skills.split(',').map((s: string) => s.trim()),
+      performanceLevels: performanceLevels || 4,
     });
 
+    const generatedContent = await generateWithGroq(prompt);
     const parsedContent = parseJsonFromResponse(generatedContent);
 
     const rubricData = {
       assignmentDescription,
-      skills,
+      assignmentName: assignmentName || 'Assignment',
+      skills: Array.isArray(skills) ? skills : skills.split(',').map((s: string) => s.trim()),
+      className: className || 'General',
+      performanceLevels: performanceLevels || 4,
       content: generatedContent,
       parsed: parsedContent,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
-    const docId = await saveRubric(userId, rubricData);
+    const docId = await saveRubricMongo(userId, rubricData);
 
     return NextResponse.json(
       {

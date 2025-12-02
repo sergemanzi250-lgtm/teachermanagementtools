@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateQuiz, parseJsonFromResponse } from '@/app/Lib/utils/groq';
-import { saveQuiz } from '@/app/Lib/firebase/firestore';
+import { generateQuizPrompt, validatePromptInput } from '@/app/Lib/utils/prompts';
+import { generateWithGroq, parseJsonFromResponse } from '@/app/Lib/utils/groq';
+import { saveQuizMongo } from '@/app/Lib/mongodb/mongodbAdmin';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { userId, topic, numberOfQuestions, difficulty, questionTypes } = body;
+    const { userId, topic, numberOfQuestions, difficulty, questionTypes, className, learningObjectives, additionalNotes } = body;
 
     if (!userId) {
       return NextResponse.json(
@@ -21,26 +22,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const generatedContent = await generateQuiz({
+    // Generate prompt using prompt system
+    const prompt = generateQuizPrompt({
       topic,
+      className: className || 'General',
       numberOfQuestions,
       difficulty,
       questionTypes,
+      learningObjectives,
+      additionalNotes,
     });
 
+    const generatedContent = await generateWithGroq(prompt);
     const parsedContent = parseJsonFromResponse(generatedContent);
 
     const quizData = {
       topic,
       numberOfQuestions,
       difficulty,
+      className: className || 'General',
       content: generatedContent,
       parsed: parsedContent,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
-    const docId = await saveQuiz(userId, quizData);
+    const docId = await saveQuizMongo(userId, quizData);
 
     return NextResponse.json(
       {

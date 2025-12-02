@@ -13,7 +13,7 @@ import {
   QueryConstraint,
   Timestamp,
 } from 'firebase/firestore';
-import { db } from './firebaseConf';
+import { db, auth } from './firebaseConf';
 import {
   RebLessonPlan,
   RtbSessionPlan,
@@ -119,6 +119,7 @@ export async function getLessonPlansByFormat(
   limitCount: number = 50
 ): Promise<LessonPlan[]> {
   try {
+    // Client-side only: use client SDK
     const constraints: QueryConstraint[] = [
       where('userId', '==', userId),
       where('format', '==', format),
@@ -146,6 +147,7 @@ export async function saveDocument<T extends { userId: string }>(
   data: Omit<T, 'id' | 'createdAt' | 'updatedAt'>
 ): Promise<string> {
   try {
+    // Client-side only: use client SDK
     const docRef = await addDoc(collection(db, collectionName), {
       ...data,
       userId,
@@ -167,6 +169,7 @@ export async function updateDocument<T>(
   updates: Partial<T>
 ): Promise<void> {
   try {
+    // Client-side only: use client SDK
     const docRef = doc(db, collectionName, docId);
     await updateDoc(docRef, {
       ...updates,
@@ -182,6 +185,7 @@ export async function updateDocument<T>(
 
 export async function deleteDocument(collectionName: string, docId: string): Promise<void> {
   try {
+    // Client-side only: use client SDK
     await deleteDoc(doc(db, collectionName, docId));
   } catch (error) {
     console.error(`Error deleting document in ${collectionName}:`, error);
@@ -193,6 +197,7 @@ export async function deleteDocument(collectionName: string, docId: string): Pro
 
 export async function getDocument<T>(collectionName: string, docId: string): Promise<T | null> {
   try {
+    // Client-side only: use client SDK
     const docSnap = await getDoc(doc(db, collectionName, docId));
     if (docSnap.exists()) {
       return {
@@ -215,6 +220,7 @@ export async function getUserDocuments<T extends { userId: string }>(
   limitCount: number = 50
 ): Promise<T[]> {
   try {
+    // Client-side only: use client SDK
     const constraints: QueryConstraint[] = [
       where('userId', '==', userId),
       orderBy('createdAt', 'desc'),
