@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateActivity, parseJsonFromResponse } from '@/app/Lib/utils/groq';
-import { saveActivity } from '@/app/Lib/firebase/firestore';
+import { generateActivityPrompt, validatePromptInput } from '@/app/Lib/utils/prompts';
+import { generateWithGroq, parseJsonFromResponse } from '@/app/Lib/utils/groq';
+import { saveActivityMongo } from '@/app/Lib/mongodb/mongodbAdmin';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { userId, topic, ageGroup, activityType, duration } = body;
+    const { userId, topic, ageGroup, activityType, duration, className, learningObjectives, materials, additionalNotes } = body;
 
     if (!userId) {
       return NextResponse.json(
@@ -29,13 +30,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const generatedContent = await generateActivity({
+    // Generate prompt using prompt system
+    const prompt = generateActivityPrompt({
       topic,
+      className: className || ageGroup,
       ageGroup,
       activityType,
-      duration,
+      duration: duration || 30,
+      learningObjectives,
+      materials,
+      additionalNotes,
     });
 
+    const generatedContent = await generateWithGroq(prompt);
     const parsedContent = parseJsonFromResponse(generatedContent);
 
     const activityData = {
@@ -43,13 +50,14 @@ export async function POST(request: NextRequest) {
       ageGroup,
       activityType,
       duration: duration || 30,
+      className: className || ageGroup,
       content: generatedContent,
       parsed: parsedContent,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
-    const docId = await saveActivity(userId, activityData);
+    const docId = await saveActivityMongo(userId, activityData);
 
     return NextResponse.json(
       {

@@ -131,53 +131,79 @@ export type LessonPlan = RebLessonPlan | RtbSessionPlan | NurseryLessonPlan;
 // Form Input Types
 export interface RebLessonPlanInput {
   schoolName: string;
-  term: string;
+  term?: string;
   subject: string;
   className: string;
-  teacherName: string;
-  lessonUnit: string;
-  lessonNumber: string;
+  teacherName?: string;
+  lessonUnit?: string;
+  lessonNumber?: string;
   duration: number;
-  key_unity_competence: string;
-  title: string;
-  general_competencies: string;
+  key_unity_competence?: string;
+  title?: string;
+  general_competencies?: string;
   type_of_special_educational_needs?: string;
-  learning_materials: string;
+  learning_materials?: string;
   location?: string;
   teaching_and_learning_activities_description?: string;
   cross_cutting_issues?: string;
+  date?: string;
+  classSize?: number;
+  language?: string;
+  lessonTitle?: string;
 }
 
 export interface RtbSessionPlanInput {
-  schoolName: string;
-  courseTitle: string;
-  courseCode: string;
+  schoolName?: string;
+  courseTitle?: string;
+  courseCode?: string;
   instructorName: string;
-  sessionNumber: number;
+  sessionNumber?: number;
   duration: number;
-  sessionObjective: string;
-  keyCompetencies: string;
-  sessionOutcome: string;
-  practicalActivities: string;
-  equipmentRequired: string;
-  safetyConsiderations: string;
-  assessmentMethod: string;
-  assessmentCriteria: string;
+  sessionObjective?: string;
+  keyCompetencies?: string;
+  sessionOutcome?: string;
+  practicalActivities?: string;
+  equipmentRequired?: string;
+  safetyConsiderations?: string;
+  assessmentMethod?: string;
+  assessmentCriteria?: string;
+  sector?: string;
+  trade?: string;
+  level?: string;
+  date?: string;
+  moduleTitle?: string;
+  week?: string;
+  classSize?: number;
+  className?: string;
+  topicOfSession?: string;
+  learningOutcomes?: string;
+  indicativeContent?: string;
+  range?: string;
+  facilitationTechnique?: string;
+  language?: string;
+  numberOfDevelopmentSteps?: number;
 }
 
 export interface NurseryLessonPlanInput {
   schoolName: string;
-  ageGroup: string;
+  ageGroup?: string;
   theme: string;
   teacherName: string;
   duration: number;
-  learningObjectives: string;
-  developmentalAreas: string;
-  introductionActivity: string;
-  mainActivities: string;
-  closingActivity: string;
-  playBasedLearning: string;
-  observationPoints: string;
+  learningObjectives?: string;
+  developmentalAreas?: string;
+  introductionActivity?: string;
+  mainActivities?: string;
+  closingActivity?: string;
+  playBasedLearning?: string;
+  observationPoints?: string;
+  term?: string;
+  date?: string;
+  subject?: string;
+  classLevel?: string;
+  lessonName?: string;
+  classSize?: number;
+  language?: string;
 }
 
 // API Response Types

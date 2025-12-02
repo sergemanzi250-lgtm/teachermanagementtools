@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateSchemeOfWork, parseJsonFromResponse } from '@/app/Lib/utils/groq';
-import { saveSchemeOfWork } from '@/app/Lib/firebase/firestore';
+import { generateSchemeOfWorkPrompt, validatePromptInput } from '@/app/Lib/utils/prompts';
+import { generateWithGroq, parseJsonFromResponse } from '@/app/Lib/utils/groq';
+import { saveSchemeOfWorkMongo } from '@/app/Lib/mongodb/mongodbAdmin';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { userId, subject, grade, weeks, topics } = body;
+    const { userId, subject, grade, weeks, topics, className, term, competencies, additionalNotes } = body;
 
     if (!userId) {
       return NextResponse.json(
@@ -21,27 +22,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const generatedContent = await generateSchemeOfWork({
+    // Generate prompt using prompt system
+    const prompt = generateSchemeOfWorkPrompt({
       subject,
-      grade,
+      className: className || grade,
       weeks,
-      topics,
+      topics: Array.isArray(topics) ? topics : topics.split(',').map((t: string) => t.trim()),
+      term,
+      competencies,
+      additionalNotes,
     });
 
+    const generatedContent = await generateWithGroq(prompt);
     const parsedContent = parseJsonFromResponse(generatedContent);
 
     const schemeData = {
       subject,
       grade,
       weeks,
-      topics,
+      topics: Array.isArray(topics) ? topics : topics.split(',').map((t: string) => t.trim()),
+      className: className || grade,
+      term,
+      competencies,
       content: generatedContent,
       parsed: parsedContent,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
-    const docId = await saveSchemeOfWork(userId, schemeData);
+    const docId = await saveSchemeOfWorkMongo(userId, schemeData);
 
     return NextResponse.json(
       {

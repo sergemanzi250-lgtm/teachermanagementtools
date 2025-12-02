@@ -46,8 +46,14 @@ export default function ViewLessonPlanPage() {
 
     setLoading(true);
     try {
-      const plan = await getLessonPlan(id);
-      setLessonPlan(plan as unknown as LessonPlan);
+      const response = await fetch(`/api/get-lesson-plan/${id}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setLessonPlan(data.data as LessonPlan);
+      } else {
+        throw new Error(data.error || 'Failed to fetch lesson plan');
+      }
     } catch (error) {
       showErrorToast('Failed to load lesson plan');
       console.error(error);
@@ -61,9 +67,17 @@ export default function ViewLessonPlanPage() {
     if (!confirm('Are you sure you want to delete this lesson plan?')) return;
 
     try {
-      await deleteLessonPlan(id);
-      showSuccessToast('Lesson plan deleted');
-      router.push('/dashboard/lessons');
+      const response = await fetch(`/api/delete-lesson-plan/${id}`, {
+        method: 'DELETE',
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        showSuccessToast('Lesson plan deleted');
+        router.push('/dashboard/lessons');
+      } else {
+        throw new Error(data.error || 'Failed to delete lesson plan');
+      }
     } catch (error) {
       showErrorToast('Failed to delete lesson plan');
     }

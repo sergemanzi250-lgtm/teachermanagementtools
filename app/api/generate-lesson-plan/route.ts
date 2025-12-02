@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateLessonPlan, parseJsonFromResponse } from '@/app/Lib/utils/groq';
-import { saveLessonPlan } from '@/app/Lib/firebase/firestore';
+import {
+  parseJsonFromResponse,
+  generateWithGroq,
+} from '@/app/Lib/utils/groq';
+import { saveLessonPlanMongo } from '@/app/Lib/mongodb/mongodbAdmin';
+import { 
+  generateRebLessonPlanPrompt,
+  generateRtbSessionPlanPrompt,
+  generateNurseryLessonPlanPrompt,
+  validatePromptInput,
+} from '@/app/Lib/utils/prompts';
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,15 +32,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate lesson plan using Groq
-    const generatedContent = await generateLessonPlan({
-      subject: input.subject || '',
-      grade: input.className || input.grade || '',
-      topic: input.title || input.topic || '',
-      duration: input.duration || 60,
-      objectives: input.objectives || input.key_unity_competence || '',
-      notes: input.notes || '',
-    });
+    // Validate form inputs
+    const validation = validatePromptInput(input);
+    if (!validation.valid) {
+      return NextResponse.json(
+        { success: false, errors: validation.errors },
+        { status: 400 }
+      );
+    }
+
+    // Generate content based on format using enhanced prompts
+    let generatedContent: string;
+
+    if (format === 'REB') {
+      const prompt = generateRebLessonPlanPrompt(input);
+      generatedContent = await generateWithGroq(prompt);
+    } else if (format === 'RTB') {
+      const prompt = generateRtbSessionPlanPrompt(input);
+      generatedContent = await generateWithGroq(prompt);
+    } else if (format === 'NURSERY') {
+      const prompt = generateNurseryLessonPlanPrompt(input);
+      generatedContent = await generateWithGroq(prompt);
+    } else {
+      throw new Error('Invalid format');
+    }
 
     // Parse the response
     const parsedContent = parseJsonFromResponse(generatedContent);
@@ -41,13 +65,14 @@ export async function POST(request: NextRequest) {
       format,
       userId,
       content: generatedContent,
+      parsed: parsedContent,
       ...input,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
-    // Save to Firestore
-    const docId = await saveLessonPlan(userId, lessonPlanData);
+    // Save to MongoDB
+    const docId = await saveLessonPlanMongo(userId, lessonPlanData);
 
     return NextResponse.json(
       {

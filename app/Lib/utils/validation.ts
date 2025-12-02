@@ -56,6 +56,9 @@ export const QuizSchema = z.object({
   numberOfQuestions: z.number().min(1, 'Number of questions must be at least 1').max(100, 'Cannot exceed 100 questions'),
   difficulty: z.enum(['easy', 'medium', 'hard']),
   questionTypes: z.array(z.string()).optional(),
+  className: z.string().optional(),
+  learningObjectives: z.string().optional(),
+  additionalNotes: z.string().optional(),
 });
 
 // Rubric Form Schema
@@ -63,6 +66,8 @@ export const RubricSchema = z.object({
   assignmentDescription: z.string().min(1, 'Assignment description is required'),
   skills: z.array(z.string().min(1, 'Skill cannot be empty')).min(1, 'At least one skill is required'),
   performanceLevels: z.number().min(3, 'Minimum 3 performance levels').max(6, 'Maximum 6 performance levels').optional(),
+  className: z.string().optional(),
+  assignmentName: z.string().optional(),
 });
 
 // Scheme of Work Schema
@@ -71,6 +76,10 @@ export const SchemeOfWorkSchema = z.object({
   grade: z.string().min(1, 'Grade/Level is required'),
   weeks: z.number().min(1, 'Weeks must be at least 1').max(52, 'Weeks cannot exceed 52'),
   topics: z.array(z.string().min(1, 'Topic cannot be empty')).min(1, 'At least one topic is required'),
+  className: z.string().optional(),
+  term: z.string().optional(),
+  competencies: z.string().optional(),
+  additionalNotes: z.string().optional(),
 });
 
 // Activity Schema
@@ -79,6 +88,10 @@ export const ActivitySchema = z.object({
   ageGroup: z.string().min(1, 'Age group is required'),
   activityType: z.enum(['group', 'hands-on', 'creative', 'individual']),
   duration: z.number().min(5, 'Duration must be at least 5 minutes').optional(),
+  className: z.string().optional(),
+  learningObjectives: z.string().optional(),
+  materials: z.string().optional(),
+  additionalNotes: z.string().optional(),
 });
 
 // Unit Plan Schema

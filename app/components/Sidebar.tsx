@@ -50,13 +50,13 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
     },
     {
       label: 'My Lesson Plans',
-      href: '/lesson-plans',
+      href: '/dashboard/lessons',
       icon: FileText,
       submenu: undefined,
     },
     {
       label: 'Recent Activities',
-      href: '/activities',
+      href: '/dashboard/activities',
       icon: History,
       submenu: undefined,
     },
