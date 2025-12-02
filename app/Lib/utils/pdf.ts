@@ -45,6 +45,132 @@ function addHeader(doc: jsPDF, title: string, metadata: Record<string, string>) 
   return yPosition + 5;
 }
 
+// Helper function to parse content and create structured tables for PDF
+function parseContentToSectionsForPDF(content: string): Record<string, string> {
+  const sections: Record<string, string> = {};
+  const lines = content.split('\n');
+  let currentSection = '';
+  let currentContent = '';
+  
+  lines.forEach((line) => {
+    const trimmedLine = line.trim();
+    
+    // Check if this line is a section header (starts with ##)
+    if (trimmedLine.startsWith('## ')) {
+      // Save previous section if exists
+      if (currentSection && currentContent.trim()) {
+        sections[currentSection] = currentContent.trim();
+      }
+      
+      // Start new section
+      currentSection = trimmedLine.replace('## ', '').replace(/\s*-\s*$/, '');
+      currentContent = '';
+    } else {
+      // Add content to current section
+      if (currentSection) {
+        currentContent += line + '\n';
+      }
+    }
+  });
+  
+  // Don't forget the last section
+  if (currentSection && currentContent.trim()) {
+    sections[currentSection] = currentContent.trim();
+  }
+  
+  return sections;
+}
+
+// Helper function to render content tables for PDF with columns and rows
+function renderContentTablesForPDF(doc: jsPDF, content: string, startY: number): number {
+  const sections = parseContentToSectionsForPDF(content);
+  let yPosition = startY;
+  
+  Object.entries(sections).forEach(([sectionName, sectionContent]) => {
+    // Check if we need a new page
+    if (yPosition > 250) {
+      doc.addPage();
+      yPosition = 20;
+    }
+    
+    // Add section header
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(59, 130, 246); // Blue color
+    
+    doc.text(sectionName, 15, yPosition);
+    yPosition += 10;
+    
+    // Reset text color
+    doc.setTextColor(0, 0, 0);
+    
+    // Split content into lines for processing
+    const lines = sectionContent.split('\n').filter(line => line.trim());
+    
+    // Create table header
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.setFillColor(59, 130, 246);
+    doc.setTextColor(255, 255, 255);
+    
+    doc.rect(15, yPosition - 5, 180, 8, 'F');
+    doc.text('No.', 20, yPosition + 1);
+    doc.text('Content', 50, yPosition + 1);
+    
+    yPosition += 10;
+    doc.setTextColor(0, 0, 0);
+    
+    lines.forEach((line, index) => {
+      const trimmedLine = line.trim();
+      
+      // Skip empty lines
+      if (!trimmedLine) return;
+      
+      // Check if it's a numbered/bulleted item
+      const isBulletPoint = /^(\d+\.|\-|\*)\s/.test(trimmedLine);
+      
+      // Set row background color
+      if (index % 2 === 0) {
+        doc.setFillColor(239, 246, 255); // Light blue
+      } else {
+        doc.setFillColor(255, 255, 255); // White
+      }
+      doc.rect(15, yPosition - 2, 180, 8, 'F');
+      
+      // Add content
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      
+      // Number/bullet column
+      const numberOrBullet = isBulletPoint ? 
+        (trimmedLine.match(/^(\d+\.|\-|\*)\s(.+)$/)?.[1] || '•') + ' ' : 
+        (index + 1) + '.';
+      
+      doc.text(numberOrBullet, 20, yPosition + 3);
+      
+      // Content column
+      const content = isBulletPoint ? 
+        trimmedLine.replace(/^(\d+\.|\-|\*)\s/, '') : 
+        trimmedLine;
+      
+      const contentLines = doc.splitTextToSize(content, 140);
+      doc.text(contentLines, 50, yPosition + 3);
+      
+      yPosition += Math.max(8, contentLines.length * 4);
+      
+      // Check if we need a new page
+      if (yPosition > 250) {
+        doc.addPage();
+        yPosition = 20;
+      }
+    });
+    
+    yPosition += 10; // Space between sections
+  });
+  
+  return yPosition;
+}
+
 // Export Lesson Plan to PDF
 export function exportLessonPlanToPDF(
   lessonPlan: Record<string, unknown>,
@@ -59,30 +185,141 @@ export function exportLessonPlanToPDF(
     Grade: lessonPlan.className as string || 'N/A',
     Duration: `${lessonPlan.duration || 'N/A'} minutes`,
     Date: new Date().toLocaleDateString(),
+    Format: lessonPlan.format as string || 'N/A',
   };
 
-  let yPosition = addHeader(doc, 'Lesson Plan', metadata);
-
-  // Add lesson content
-  doc.setFontSize(11);
-  const content = lessonPlan.content as string || JSON.stringify(lessonPlan, null, 2);
-
-  const lines = doc.splitTextToSize(content, pageWidth - 30);
+  // Determine document title based on format
+  const format = lessonPlan.format as string;
+  const documentTitle = format === 'RTB' ? 'Session Plan' : 'Lesson Plan';
+  
+  let yPosition = addHeader(doc, documentTitle, metadata);
   yPosition += 10;
 
-  lines.forEach((line: string) => {
-    if (yPosition > 270) {
-      doc.addPage();
-      yPosition = 15;
-    }
-    doc.text(line, 15, yPosition);
-    yPosition += 5;
-  });
+  // If we have content with ## headers, use structured table format
+  if (lessonPlan.content && typeof lessonPlan.content === 'string' && lessonPlan.content.includes('##')) {
+    yPosition = renderContentTablesForPDF(doc, lessonPlan.content as string, yPosition);
+  } 
+  // Add structured content if parsed data is available
+  else if (lessonPlan.parsed && typeof lessonPlan.parsed === 'object') {
+    const parsed = lessonPlan.parsed as Record<string, unknown>;
+    
+    // Group related fields into sections like in web display
+    const sections = {
+      'Basic Information': ['title', 'subject', 'className', 'format', 'duration', 'createdAt'],
+      'Teaching Details': ['teaching_activities', 'learner_activities', 'timing_for_each_step', 'teaching_and_learning_activities_description'],
+      'Assessment': ['assessment_method', 'assessment_tools', 'assessmentCriteria'],
+      'Materials & Resources': ['learning_materials', 'equipmentRequired', 'materials'],
+      'Competencies & Objectives': ['key_unity_competence', 'general_competencies', 'learningObjectives', 'keyCompetencies', 'sessionObjective'],
+      'Additional Details': ['location', 'term', 'date', 'schoolName', 'teacherName', 'instructorName', 'sessionNumber', 'sessionDate']
+    };
+
+    Object.entries(sections).forEach(([sectionName, fields]) => {
+      const sectionData = Object.entries(parsed)
+        .filter(([key]) => fields.includes(key) && !['id', '_id', 'userId', 'updatedAt'].includes(key))
+        .map(([key, value]) => ({
+          field: formatFieldNameForPDF(key),
+          value: formatValueForPDF(value)
+        }));
+
+      if (sectionData.length === 0) return;
+
+      // Check if we need a new page
+      if (yPosition > 250) {
+        doc.addPage();
+        yPosition = 20;
+      }
+
+      // Add section header
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(59, 130, 246); // Blue color
+      
+      doc.text(sectionName, 15, yPosition);
+      yPosition += 10;
+
+      // Create table header
+      doc.setFillColor(59, 130, 246);
+      doc.setTextColor(255, 255, 255);
+      doc.rect(15, yPosition - 5, 180, 8, 'F');
+      
+      doc.setFontSize(10);
+      doc.text('Field', 20, yPosition + 1);
+      doc.text('Content', 100, yPosition + 1);
+      
+      yPosition += 10;
+      doc.setTextColor(0, 0, 0);
+
+      // Add table rows
+      sectionData.forEach((item, index) => {
+        // Set row background color
+        if (index % 2 === 0) {
+          doc.setFillColor(239, 246, 255); // Light blue
+        } else {
+          doc.setFillColor(255, 255, 255); // White
+        }
+        doc.rect(15, yPosition - 2, 180, 8, 'F');
+
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'bold');
+        doc.text(item.field, 20, yPosition + 3);
+        
+        doc.setFont('helvetica', 'normal');
+        const contentLines = doc.splitTextToSize(item.value, 120);
+        doc.text(contentLines, 100, yPosition + 3);
+        
+        yPosition += Math.max(8, contentLines.length * 4);
+        
+        // Check if we need a new page
+        if (yPosition > 250) {
+          doc.addPage();
+          yPosition = 20;
+        }
+      });
+      
+      yPosition += 10; // Space between sections
+    });
+  } else {
+    // Fallback to raw content
+    doc.setFontSize(11);
+    const content = lessonPlan.content as string || JSON.stringify(lessonPlan, null, 2);
+    
+    const lines = doc.splitTextToSize(content, pageWidth - 30);
+    
+    lines.forEach((line: string) => {
+      if (yPosition > 270) {
+        doc.addPage();
+        yPosition = 15;
+      }
+      doc.text(line, 15, yPosition);
+      yPosition += 5;
+    });
+  }
 
   const pageCount = doc.internal.pages.length - 1;
   addFooter(doc, pageCount);
 
   doc.save(filename);
+}
+
+// Helper function to format field names for PDF
+function formatFieldNameForPDF(key: string): string {
+  return key
+    .replace(/_/g, ' ')
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/^./, str => str.toUpperCase());
+}
+
+// Helper function to format values for PDF
+function formatValueForPDF(value: unknown): string {
+  if (Array.isArray(value)) {
+    return value.map((item, index) => `${index + 1}. ${formatValueForPDF(item)}`).join('\n');
+  } else if (typeof value === 'object' && value !== null) {
+    return Object.entries(value)
+      .map(([k, v]) => `${k}: ${formatValueForPDF(v)}`)
+      .join('\n');
+  } else {
+    return String(value);
+  }
 }
 
 // Export Quiz to PDF

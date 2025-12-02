@@ -171,6 +171,7 @@ export interface RtbSessionPlanInput {
   trade?: string;
   level?: string;
   date?: string;
+  term?: string;
   moduleTitle?: string;
   week?: string;
   classSize?: number;

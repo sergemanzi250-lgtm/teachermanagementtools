@@ -283,12 +283,81 @@ export function parseJsonFromResponse(response: string): Record<string, unknown>
     if (jsonMatch) {
       return JSON.parse(jsonMatch[0]);
     }
-    // If no JSON found, return the raw response
+    
+    // If no JSON found, try to parse structured text into sections
+    const structuredResponse = parseStructuredText(response);
+    if (Object.keys(structuredResponse).length > 1) {
+      return structuredResponse;
+    }
+    
+    // If no structure found, return the raw response
     return { content: response };
   } catch (error) {
     console.error('Error parsing JSON from Groq response:', error);
     return { content: response, error: 'Failed to parse JSON' };
   }
+}
+
+// Helper function to parse structured text into sections
+function parseStructuredText(text: string): Record<string, unknown> {
+  const result: Record<string, unknown> = { content: text };
+  
+  // Common section headers in both REB and RTB documents
+  const sectionPatterns = [
+    /LESSON DETAILS|SESSION HEADER/i,
+    /KEY UNITY COMPETENCE|KEY COMPETENCIES/i,
+    /LEARNING OUTCOMES|SESSION OBJECTIVES/i,
+    /GENERIC COMPETENCIES|EXPECTED SESSION OUTCOMES/i,
+    /MATERIALS AND RESOURCES|MATERIALS AND EQUIPMENT/i,
+    /INTRODUCTION|WARM-UP/i,
+    /TEACHING AND LEARNING ACTIVITIES|PRACTICAL ACTIVITIES/i,
+    /DIFFERENTIATED ACTIVITIES/i,
+    /ASSESSMENT|ASSESSMENT STRATEGY/i,
+    /CROSS-CUTTING ISSUES/i,
+    /HOMEWORK|CONSOLIDATION/i,
+    /REFLECTION|TEACHER REFLECTION/i
+  ];
+  
+  // Find sections in the text
+  let currentSection = '';
+  let currentContent = '';
+  
+  const lines = text.split('\n');
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    
+    // Skip empty lines
+    if (!line) continue;
+    
+    // Check if this line is a section header
+    const isSectionHeader = sectionPatterns.some(pattern => pattern.test(line)) ||
+                           /^\d+\.\s+[A-Z\s]+:?$/.test(line) || // Numbered section headers
+                           /^[A-Z\s]{5,}:?$/.test(line);        // All caps section headers
+    
+    if (isSectionHeader) {
+      // Save previous section if it exists
+      if (currentSection && currentContent) {
+        result[currentSection.toLowerCase().replace(/\s+/g, '_')] = currentContent.trim();
+      }
+      
+      // Start new section
+      currentSection = line.replace(/^\d+\.\s+/, '')  // Remove numbering
+                          .replace(/:$/, '')          // Remove trailing colon
+                          .trim();
+      currentContent = '';
+    } else {
+      // Add to current section content
+      currentContent += line + '\n';
+    }
+  }
+  
+  // Save the last section
+  if (currentSection && currentContent) {
+    result[currentSection.toLowerCase().replace(/\s+/g, '_')] = currentContent.trim();
+  }
+  
+  return result;
 }
 
 // Type-specific generation functions
