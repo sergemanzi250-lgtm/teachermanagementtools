@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate form inputs
-    const validation = validatePromptInput(input);
+    const validation = validatePromptInput({ ...input, format });
     if (!validation.valid) {
       return NextResponse.json(
         { success: false, errors: validation.errors },

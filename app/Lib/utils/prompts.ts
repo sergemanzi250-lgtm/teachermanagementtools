@@ -170,61 +170,127 @@ ${input.teaching_and_learning_activities_description ? `- Teaching & Learning Ac
 ${input.cross_cutting_issues ? `- Cross-Cutting Issues: ${input.cross_cutting_issues}` : ''}
 
 TASK:
-Generate a comprehensive, REB-compliant lesson plan using ONLY the information provided above. Structure it with:
+Generate a comprehensive, REB-compliant lesson plan using ONLY the information provided above.
 
-1. LESSON DETAILS
-   - Date, Duration, Grade/Class Level
+IMPORTANT: Format the lesson plan as a structured HTML table with clear sections, similar to this example:
 
-2. KEY UNITY COMPETENCE
-   - [From user input]
+<table border="1" cellpadding="5" cellspacing="0" width="100%">
+  <tr>
+    <th colspan="4" align="center">LESSON PLAN</th>
+  </tr>
+  <tr>
+    <td width="25%"><strong>School:</strong> [School Name]</td>
+    <td width="25%"><strong>Subject:</strong> [Subject]</td>
+    <td width="25%"><strong>Level:</strong> [Class Level]</td>
+    <td width="25%"><strong>Date:</strong> [Date]</td>
+  </tr>
+  <tr>
+    <td><strong>Teacher name:</strong> [Teacher Name]</td>
+    <td colspan="3"><strong>Term:</strong> [Term]</td>
+  </tr>
+  <tr>
+    <td><strong>Module title:</strong> [Module Title]</td>
+    <td><strong>Week:</strong> [Week Number]</td>
+    <td><strong>No. Trainees:</strong> [Class Size]</td>
+    <td><strong>Class:</strong> [Class Name]</td>
+  </tr>
+  <tr>
+    <td colspan="4"><strong>Learning Outcome:</strong> [Learning Outcome]</td>
+  </tr>
+  <tr>
+    <td colspan="4"><strong>Indicative content:</strong> [Content Description]</td>
+  </tr>
+  <tr>
+    <td colspan="2"><strong>Topic of the session:</strong> [Topic]</td>
+    <td colspan="2"><strong>Duration of the session:</strong> ${input.duration} minutes</td>
+  </tr>
+  <tr>
+    <td colspan="4"><strong>Range:</strong> [Range Description]</td>
+  </tr>
+  <tr>
+    <td colspan="4"><strong>Objectives:</strong><br>
+    1. [Objective 1]<br>
+    2. [Objective 2]</td>
+  </tr>
+  <tr>
+    <td colspan="4"><strong>Facilitation technique(s):</strong><br>
+    [Techniques]</td>
+  </tr>
+  <tr>
+    <td colspan="1" bgcolor="#FFFFCC"><strong>Introduction</strong></td>
+    <td colspan="1" bgcolor="#FFFFCC"><strong>Resources</strong></td>
+    <td colspan="1" bgcolor="#FFFFCC"><strong>Duration</strong></td>
+  </tr>
+  <tr>
+    <td>
+      <strong>Trainer's activity</strong><br>
+      • [Activity 1]<br>
+      • [Activity 2]<br>
+      <br>
+      <strong>Learner's activity</strong><br>
+      • [Activity 1]<br>
+      • [Activity 2]
+    </td>
+    <td>
+      • [Resource 1]<br>
+      • [Resource 2]
+    </td>
+    <td>[Duration] minutes</td>
+  </tr>
+  <tr>
+    <td colspan="3" bgcolor="#FFFFCC"><strong>Development/Body</strong></td>
+  </tr>
+  <tr>
+    <td>
+      <strong>Step 1</strong><br>
+      <strong>Trainer's activity</strong><br>
+      • [Activity 1]<br>
+      • [Activity 2]<br>
+      <br>
+      <strong>Learner's activity</strong><br>
+      • [Activity 1]<br>
+      • [Activity 2]
+    </td>
+    <td>
+      • [Resource 1]<br>
+      • [Resource 2]
+    </td>
+    <td>[Duration] minutes</td>
+  </tr>
+  <tr>
+    <td>
+      <strong>Step 2</strong><br>
+      <strong>Trainer's activity</strong><br>
+      • [Activity 1]<br>
+      • [Activity 2]<br>
+      <br>
+      <strong>Learner's activity</strong><br>
+      • [Activity 1]<br>
+      • [Activity 2]
+    </td>
+    <td>
+      • [Resource 1]<br>
+      • [Resource 2]
+    </td>
+    <td>[Duration] minutes</td>
+  </tr>
+</table>
 
-3. LEARNING OUTCOMES
-   - Specific, measurable outcomes derived from the key competence and general competencies
+Include all the following sections in your table:
+1. Header information (School, Subject, Level, Date, Teacher, Term)
+2. Module information (Title, Week, Class size, Class name)
+3. Learning Outcome
+4. Indicative content
+5. Topic and Duration
+6. Range
+7. Objectives (numbered list)
+8. Facilitation techniques
+9. Introduction section with Trainer's activities, Learner's activities, Resources, and Duration
+10. Development/Body section with multiple steps, each containing Trainer's activities, Learner's activities, Resources, and Duration
 
-4. GENERIC COMPETENCIES TO DEVELOP
-   - [From user general competencies input]
+Use bullet points (•) for listing activities and resources. Use appropriate background colors for section headers (light yellow #FFFFCC for main sections).
 
-5. MATERIALS AND RESOURCES
-   - Specific items needed for this lesson: ${input.learning_materials}
-
-6. INTRODUCTION/WARM-UP (First 5-10 minutes)
-   - Hook/Motivation activity
-   - Connect to prior knowledge
-   - Introduce lesson objectives
-
-7. TEACHING AND LEARNING ACTIVITIES
-   Teacher Activities:
-   - Specific teaching strategies
-   - Demonstration/explanation steps
-   Learner Activities:
-   - How students will engage
-   - Practice opportunities
-   - Collaborative activities
-   Timing: [Specific times for each section]
-
-8. DIFFERENTIATED ACTIVITIES
-   - For high achievers
-   - For struggling learners
-${input.type_of_special_educational_needs ? `   - For learners with ${input.type_of_special_educational_needs}` : '   - For learners with diverse needs'}
-
-9. ASSESSMENT
-   - Assessment method: [observation, questioning, tests, projects, etc.]
-   - What will be assessed
-   - How success will be measured
-
-10. CROSS-CUTTING ISSUES
-${input.cross_cutting_issues ? `    - Incorporate: ${input.cross_cutting_issues}` : '    - Incorporate: Gender equality, Inclusive education, Environmental sustainability'}
-
-11. HOMEWORK/CONSOLIDATION
-    - Reinforcement activity
-    - Link to next lesson
-
-12. TEACHER REFLECTION NOTES
-    - Key points to remember
-    - Common learner misconceptions
-    - Adjustments for next time
-
-Generate the lesson plan in clear, professional, structured format ready for teacher use.`;
+Generate the lesson plan in this structured HTML table format ready for teacher use.`;
 };
 
 // ============================================================================
@@ -243,79 +309,145 @@ ${instructions}
 ${constraints}
 
 USER PROVIDED INFORMATION:
-- School/Institute: ${input.schoolName}
-- Course Title: ${input.courseTitle}
-- Course Code: ${input.courseCode}
-- Instructor: ${input.instructorName}
-- Session Number: ${input.sessionNumber}
+- Sector: ${input.sector || 'N/A'}
+- Trade: ${input.trade || 'N/A'}
+- Level: ${input.level || 'N/A'}
+- Date: ${input.date || 'N/A'}
+- Trainer name: ${input.instructorName}
+- Term: ${input.term || 'N/A'}
+- Module title: ${input.moduleTitle || 'Occupation'}
+- Week: ${input.week || '1'}
+- No. Trainees: ${input.classSize || '25'}
+- Class: ${input.className || 'N/A'}
+- Learning Outcome: ${input.learningOutcomes || 'N/A'}
+- Indicative content: ${input.indicativeContent || 'N/A'}
+- Topic of the session: ${input.topicOfSession || 'N/A'}
+- Range: ${input.range || 'N/A'}
+- Facilitation technique: ${input.facilitationTechnique || 'Demonstration and Group Discussion'}
 - Duration: ${input.duration} minutes
-- Session Objective: ${input.sessionObjective}
-- Key Competencies: ${input.keyCompetencies}
-- Expected Outcome: ${input.sessionOutcome}
-- Practical Activities: ${input.practicalActivities}
-- Equipment Required: ${input.equipmentRequired}
-- Safety Considerations: ${input.safetyConsiderations}
-- Assessment Method: ${input.assessmentMethod}
-- Assessment Criteria: ${input.assessmentCriteria}
 
 TASK:
-Generate a professional RTB-compliant TVET session plan using ONLY the information provided above. Structure it with:
+Generate a professional RTB-compliant TVET session plan using ONLY the information provided above.
 
-1. SESSION HEADER
-   - Course: ${input.courseTitle} (${input.courseCode})
-   - Session ${input.sessionNumber}
-   - Duration: ${input.duration} minutes
-   - Instructor: ${input.instructorName}
+IMPORTANT: Format the session plan as a structured HTML table with clear sections, similar to this example:
 
-2. SESSION OBJECTIVES
-   - Primary: ${input.sessionObjective}
-   - Specific learning outcomes
+<table border="1" cellpadding="5" cellspacing="0" width="100%">
+  <tr>
+    <th colspan="4" align="center">SESSION PLAN</th>
+  </tr>
+  <tr>
+    <td width="25%"><strong>Sector:</strong> [Sector]</td>
+    <td width="25%"><strong>Trade:</strong> [Trade]</td>
+    <td width="25%"><strong>Level:</strong> [Level]</td>
+    <td width="25%"><strong>Date:</strong> [Date]</td>
+  </tr>
+  <tr>
+    <td><strong>Trainer name:</strong> [Trainer Name]</td>
+    <td colspan="3"><strong>Term:</strong> [Term]</td>
+  </tr>
+  <tr>
+    <td><strong>Module title:</strong> [Module Title]</td>
+    <td><strong>Week:</strong> [Week Number]</td>
+    <td><strong>No. Trainees:</strong> [Class Size]</td>
+    <td><strong>Class:</strong> [Class Name]</td>
+  </tr>
+  <tr>
+    <td colspan="4"><strong>Learning Outcome:</strong> [Learning Outcome]</td>
+  </tr>
+  <tr>
+    <td colspan="4"><strong>Indicative content:</strong> [Content Description]</td>
+  </tr>
+  <tr>
+    <td colspan="2"><strong>Topic of the session:</strong> [Topic]</td>
+    <td colspan="2"><strong>Duration of the session:</strong> ${input.duration} minutes</td>
+  </tr>
+  <tr>
+    <td colspan="4"><strong>Range:</strong> [Range Description]</td>
+  </tr>
+  <tr>
+    <td colspan="4"><strong>Objectives:</strong><br>
+    1. [Objective 1]<br>
+    2. [Objective 2]</td>
+  </tr>
+  <tr>
+    <td colspan="4"><strong>Facilitation technique(s):</strong><br>
+    [Techniques]</td>
+  </tr>
+  <tr>
+    <td colspan="1" bgcolor="#FFFFCC"><strong>Introduction</strong></td>
+    <td colspan="1" bgcolor="#FFFFCC"><strong>Resources</strong></td>
+    <td colspan="1" bgcolor="#FFFFCC"><strong>Duration</strong></td>
+  </tr>
+  <tr>
+    <td>
+      <strong>Trainer's activity</strong><br>
+      • [Activity 1]<br>
+      • [Activity 2]<br>
+      <br>
+      <strong>Learner's activity</strong><br>
+      • [Activity 1]<br>
+      • [Activity 2]
+    </td>
+    <td>
+      • [Resource 1]<br>
+      • [Resource 2]
+    </td>
+    <td>[Duration] minutes</td>
+  </tr>
+  <tr>
+    <td colspan="3" bgcolor="#FFFFCC"><strong>Development/Body</strong></td>
+  </tr>
+  <tr>
+    <td>
+      <strong>Step 1</strong><br>
+      <strong>Trainer's activity</strong><br>
+      • [Activity 1]<br>
+      • [Activity 2]<br>
+      <br>
+      <strong>Learner's activity</strong><br>
+      • [Activity 1]<br>
+      • [Activity 2]
+    </td>
+    <td>
+      • [Resource 1]<br>
+      • [Resource 2]
+    </td>
+    <td>[Duration] minutes</td>
+  </tr>
+  <tr>
+    <td>
+      <strong>Step 2</strong><br>
+      <strong>Trainer's activity</strong><br>
+      • [Activity 1]<br>
+      • [Activity 2]<br>
+      <br>
+      <strong>Learner's activity</strong><br>
+      • [Activity 1]<br>
+      • [Activity 2]
+    </td>
+    <td>
+      • [Resource 1]<br>
+      • [Resource 2]
+    </td>
+    <td>[Duration] minutes</td>
+  </tr>
+</table>
 
-3. KEY COMPETENCIES TO DEVELOP
-   - ${input.keyCompetencies}
-   - How these will be developed during session
+Include all the following sections in your table:
+1. Header information (Sector, Trade, Level, Date, Trainer, Term)
+2. Module information (Title, Week, Class size, Class name)
+3. Learning Outcome
+4. Indicative content
+5. Topic and Duration
+6. Range
+7. Objectives (numbered list)
+8. Facilitation techniques
+9. Introduction section with Trainer's activities, Learner's activities, Resources, and Duration
+10. Development/Body section with multiple steps, each containing Trainer's activities, Learner's activities, Resources, and Duration
 
-4. EXPECTED SESSION OUTCOMES
-   - ${input.sessionOutcome}
-   - Measurable indicators of success
+Use bullet points (•) for listing activities and resources. Use appropriate background colors for section headers (light yellow #FFFFCC for main sections).
 
-5. MATERIALS AND EQUIPMENT REQUIRED
-   - All items needed: ${input.equipmentRequired}
-   - Where to obtain/prepare items
-   - Setup requirements
-
-6. SAFETY CONSIDERATIONS & PROCEDURES
-   - ${input.safetyConsiderations}
-   - Emergency procedures
-   - Personal protective equipment (PPE) requirements
-   - Safe practice guidelines
-
-7. PRACTICAL ACTIVITIES
-   Detailed step-by-step activities:
-   - ${input.practicalActivities}
-   - Include specific instructions for trainees
-   - Time allocations for each activity
-   - Demonstration procedures if needed
-
-8. ASSESSMENT STRATEGY
-   - Method: ${input.assessmentMethod}
-   - Criteria: ${input.assessmentCriteria}
-   - How competency will be verified
-   - Observation points during practical work
-
-9. REFLECTION AND FOLLOW-UP
-   - Key learning points to consolidate
-   - Questions for trainee reflection
-   - Link to next session
-   - Further practice recommendations
-
-10. INSTRUCTOR GUIDANCE NOTES
-    - Tips for effective delivery
-    - Common challenges and solutions
-    - Resource management
-    - Time management strategies
-
-Generate the session plan in clear, professional, structured format ready for trainer use.`;
+Generate the session plan in this structured HTML table format ready for trainer use.`;
 };
 
 // ============================================================================
@@ -878,17 +1010,39 @@ export const enhancePromptWithRequirements = (
  */
 export const validatePromptInput = (input: Record<string, any>): { valid: boolean; errors: string[] } => {
   const errors: string[] = [];
+  const format = input.format;
 
-  // Check for empty required fields
-  const requiredFields = Object.entries(input)
-    .filter(([key]) => key !== 'notes' && key !== 'additionalNotes' && key !== 'term')
-    .map(([key]) => key);
+  // Format-specific validation rules
+  const formatRules: Record<string, { required: string[]; optional?: string[] }> = {
+    REB: {
+      required: ['schoolName', 'subject', 'className', 'duration'],
+    },
+    RTB: {
+      required: ['instructorName', 'duration'],
+    },
+    NURSERY: {
+      required: ['schoolName', 'theme', 'teacherName', 'duration'],
+    },
+  };
 
-  requiredFields.forEach((field) => {
-    if (!input[field] || (typeof input[field] === 'string' && input[field].trim() === '')) {
-      errors.push(`Required field "${field}" is missing or empty`);
-    }
-  });
+  if (format && formatRules[format]) {
+    const { required } = formatRules[format];
+    
+    // Check format-specific required fields
+    required.forEach((field) => {
+      if (!input[field] || (typeof input[field] === 'string' && input[field].trim() === '')) {
+        errors.push(`Required field "${field}" is missing or empty`);
+      }
+    });
+  } else {
+    // Fallback validation for unknown formats
+    const genericRequired = ['duration'];
+    genericRequired.forEach((field) => {
+      if (!input[field] || (typeof input[field] === 'string' && input[field].trim() === '')) {
+        errors.push(`Required field "${field}" is missing or empty`);
+      }
+    });
+  }
 
   return {
     valid: errors.length === 0,
