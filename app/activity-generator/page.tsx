@@ -89,6 +89,10 @@ export default function ActivityGeneratorPage() {
       ]
     },
     duration: { label: 'Duration (minutes)', type: 'number' as const, placeholder: '30' },
+    className: { label: 'Class Name', placeholder: 'e.g., Grade 5A' },
+    learningObjectives: { label: 'Learning Objectives', placeholder: 'e.g., Students will understand...' },
+    materials: { label: 'Materials Needed', placeholder: 'e.g., Whiteboard, markers, worksheets...' },
+    additionalNotes: { label: 'Additional Notes', placeholder: 'Any special instructions or considerations...' },
   };
 
   return (
