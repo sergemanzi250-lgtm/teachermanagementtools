@@ -43,7 +43,7 @@ export default function RtbSessionPlanPage() {
         throw new Error('User not authenticated');
       }
 
-      if (!formData.schoolName || !formData.courseTitle || !formData.instructorName) {
+      if (!formData.instructorName) {
         throw new Error('Please fill in all required fields');
       }
 
