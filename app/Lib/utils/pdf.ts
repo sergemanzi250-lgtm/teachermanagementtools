@@ -1,12 +1,19 @@
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
-(pdfMake as any).vfs = pdfFonts;
+
+// Initialize pdfMake with fonts
+if (typeof window !== 'undefined') {
+  (pdfMake as any).vfs = (pdfFonts as any).pdfMake?.vfs || pdfFonts;
+}
 
 export function exportLessonPlanToPDF(plan: any, filename: string) {
-  if (!plan?.parsed) throw new Error('Lesson plan missing parsed structure');
+  if (!plan?.parsed) {
+    console.error('Lesson plan missing parsed structure:', plan);
+    throw new Error('Lesson plan missing parsed structure');
+  }
 
   const p = plan.parsed;
-  const format = plan.format;
+  const format = plan.format || 'REB'; // Default to REB if format is missing
 
   let content: any[] = [];
 
@@ -166,7 +173,7 @@ export function exportLessonPlanToPDF(plan: any, filename: string) {
       textLine(p.Closing_Activity),
     ];
   } else {
-    // Fallback
+    // Fallback - render all parsed fields as a generic table
     content = [
       {
         text: 'Lesson Plan',
@@ -174,10 +181,12 @@ export function exportLessonPlanToPDF(plan: any, filename: string) {
         style: 'title',
         margin: [0, 0, 0, 10]
       },
-      {
-        text: p.content || 'No content available',
-        fontSize: 12
-      }
+      ...Object.entries(p).map(([key, value]) => ({
+        stack: [
+          sectionTitle(key.replace(/_/g, ' ')),
+          textLine(Array.isArray(value) ? value.join(', ') : String(value || '')),
+        ]
+      }))
     ];
   }
 
