@@ -4,7 +4,12 @@ import {
   generateWithGroq,
 } from '@/app/Lib/utils/groq';
 import { saveLessonPlanMongo } from '@/app/Lib/mongodb/mongodbAdmin';
+<<<<<<< HEAD
 import { 
+=======
+import { stripHTML, cleanHTML } from '@/app/Lib/utils/sanitize';
+import {
+>>>>>>> 50d166d (feat: add complete teacher management system with AI lesson planning)
   generateRebLessonPlanPrompt,
   generateRtbSessionPlanPrompt,
   generateNurseryLessonPlanPrompt,
@@ -47,12 +52,27 @@ export async function POST(request: NextRequest) {
     if (format === 'REB') {
       const prompt = generateRebLessonPlanPrompt(input);
       generatedContent = await generateWithGroq(prompt);
+<<<<<<< HEAD
     } else if (format === 'RTB') {
       const prompt = generateRtbSessionPlanPrompt(input);
       generatedContent = await generateWithGroq(prompt);
     } else if (format === 'NURSERY') {
       const prompt = generateNurseryLessonPlanPrompt(input);
       generatedContent = await generateWithGroq(prompt);
+=======
+      // Clean HTML tags from REB generated content
+      generatedContent = cleanHTML(generatedContent);
+    } else if (format === 'RTB') {
+      const prompt = generateRtbSessionPlanPrompt(input);
+      generatedContent = await generateWithGroq(prompt);
+      // Strip HTML tags from RTB generated content
+      generatedContent = stripHTML(generatedContent);
+    } else if (format === 'NURSERY') {
+      const prompt = generateNurseryLessonPlanPrompt(input);
+      generatedContent = await generateWithGroq(prompt);
+      // Clean HTML tags from NURSERY generated content
+      generatedContent = cleanHTML(generatedContent);
+>>>>>>> 50d166d (feat: add complete teacher management system with AI lesson planning)
     } else {
       throw new Error('Invalid format');
     }
