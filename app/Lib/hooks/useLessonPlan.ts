@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { showErrorToast, showSuccessToast } from '@/app/Lib/utils/toast';
-import { exportLessonPlanToPDF } from '../utils/pdf';
 import { RebLessonPlan } from '../types/type';
+import { exportLessonPlanToPDF } from '../utils/pdf';
 
 type LessonPlanWithParsed = RebLessonPlan & { parsed: Record<string, unknown> };
 
@@ -47,8 +47,13 @@ export function useLessonPlan(id?: string) {
 
   const exportPDF = () => {
     if (!lessonPlan) return;
-    exportLessonPlanToPDF(lessonPlan as any, `${lessonPlan.title}.pdf`);
-    showSuccessToast('Exported PDF');
+    try {
+      exportLessonPlanToPDF(lessonPlan as any, `${lessonPlan.title || 'lesson-plan'}.pdf`);
+      showSuccessToast('Exported PDF');
+    } catch (error) {
+      console.error('PDF export error:', error);
+      showErrorToast('Failed to export PDF');
+    }
   };
 
   return { lessonPlan, loading, remove, exportPDF };

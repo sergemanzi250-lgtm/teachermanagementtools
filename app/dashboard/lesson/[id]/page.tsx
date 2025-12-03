@@ -1,12 +1,12 @@
 'use client';
-
 import { useParams } from 'next/navigation';
 import { LoadingOverlay } from '@/app/components/Loading';
 import { useLessonPlan } from '@/app/Lib/hooks/useLessonPlan';
 import { DashboardLayout } from '@/app/components/DashboardLayout';
 import LessonHeader from '@/app/components/lesson-plan/LessonHeader';
 import LessonMeta from '@/app/components/lesson-plan/LessonMeta';
-import LessonContent from '@/app/components/lesson-plan/LessonContent';
+import CleanLessonContent from '@/app/components/lesson-plan/CleanLessonContent';
+import { processUserContent } from '@/app/Lib/utils/cleanContent';
 
 export default function LessonPlanPage() {
   const params = useParams();
@@ -27,7 +27,7 @@ export default function LessonPlanPage() {
           onDelete={remove}
         />
         <LessonMeta data={lessonPlan} />
-        <LessonContent parsed={lessonPlan.parsed} />
+        <CleanLessonContent content={lessonPlan.content || JSON.stringify(lessonPlan.parsed)} />
       </div>
     </DashboardLayout>
   );
