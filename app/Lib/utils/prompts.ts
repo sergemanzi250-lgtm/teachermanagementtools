@@ -12,6 +12,79 @@ import {
 } from '../types/type';
 
 // ============================================================================
+// INPUT VALIDATION
+// ============================================================================
+
+/**
+ * Interface for prompt input validation
+ */
+interface PromptInput {
+  format: string;
+  schoolName?: string;
+  teacherName?: string;
+  subject?: string;
+  className?: string;
+  term?: string;
+  lessonUnit?: string;
+  lessonNumber?: string;
+  duration?: string | number;
+  key_unity_competence?: string;
+  title?: string;
+  learning_materials?: string;
+  instructorName?: string;
+  topicOfSession?: string;
+  learningOutcomes?: string;
+  ageGroup?: string;
+  theme?: string;
+  learningObjectives?: string;
+  [key: string]: string | number | boolean | undefined;
+}
+
+/**
+ * Validate prompt input data
+ */
+export const validatePromptInput = (input: PromptInput): { valid: boolean; errors: string[] } => {
+  const errors: string[] = [];
+
+  // Basic validation for common required fields
+  if (!input.format) {
+    errors.push('Format is required');
+  }
+
+  // Validate based on format
+  if (input.format === 'REB') {
+    if (!input.schoolName) errors.push('School name is required for REB format');
+    if (!input.teacherName) errors.push('Teacher name is required for REB format');
+    if (!input.subject) errors.push('Subject is required for REB format');
+    if (!input.className) errors.push('Class is required for REB format');
+    if (!input.term) errors.push('Term is required for REB format');
+    if (!input.lessonUnit) errors.push('Lesson unit is required for REB format');
+    if (!input.lessonNumber) errors.push('Lesson number is required for REB format');
+    if (!input.duration) errors.push('Duration is required for REB format');
+    if (!input.key_unity_competence) errors.push('Key unity competence is required for REB format');
+    if (!input.title) errors.push('Lesson title is required for REB format');
+    if (!input.learning_materials) errors.push('Learning materials are required for REB format');
+  } else if (input.format === 'RTB') {
+    if (!input.instructorName) errors.push('Instructor name is required for RTB format');
+    if (!input.topicOfSession) errors.push('Topic of session is required for RTB format');
+    if (!input.duration) errors.push('Duration is required for RTB format');
+    if (!input.learningOutcomes) errors.push('Learning outcomes are required for RTB format');
+  } else if (input.format === 'NURSERY') {
+    if (!input.schoolName) errors.push('School name is required for Nursery format');
+    if (!input.teacherName) errors.push('Teacher name is required for Nursery format');
+    if (!input.ageGroup) errors.push('Age group is required for Nursery format');
+    if (!input.theme) errors.push('Theme is required for Nursery format');
+    if (!input.duration) errors.push('Duration is required for Nursery format');
+    if (!input.learningObjectives) errors.push('Learning objectives are required for Nursery format');
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors
+  };
+};
+
+// ============================================================================
 // CORE PROMPT ENGINEERING UTILITIES
 // ============================================================================
 
