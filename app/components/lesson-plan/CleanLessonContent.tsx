@@ -30,15 +30,47 @@ export default function CleanLessonContent({ content }: CleanLessonContentProps)
   const parseSessionPlan = (text: string) => {
     if (!text || text.trim() === '') return null;
 
-    const lines = text.split('\n').map(stripHTML).filter(line => line.length > 0);
+    const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
     
     const plan: Record<string, any> = {};
     let currentSection = '';
+    let currentStep = '';
+    let currentActivities: string[] = [];
+    let currentResources: string[] = [];
+    let currentDuration = '';
+    let tempContent = '';
     
+    const resetStep = () => {
+      currentStep = '';
+      currentActivities = [];
+      currentResources = [];
+      currentDuration = '';
+      tempContent = '';
+    };
+    
+    const saveStep = () => {
+      if (currentStep && (currentActivities.length > 0 || currentResources.length > 0 || tempContent.length > 0)) {
+        if (!plan['Steps']) plan['Steps'] = [];
+        plan['Steps'].push({
+          title: currentStep,
+          activities: currentActivities,
+          resources: currentResources,
+          duration: currentDuration,
+          content: tempContent
+        });
+      }
+      resetStep();
+    };
+    
+    // Process each line
     lines.forEach(line => {
-      const lower = line.toLowerCase();
+      const cleanLine = stripHTML(line.replace(/\*\*/g, ''));
+      const lower = cleanLine.toLowerCase();
       
-      // Detect major sections
+      // Skip separator lines
+      if (cleanLine === '---') return;
+      
+      // Detect main sections
       if (lower.includes('sector') && lower.includes(':')) {
         const parts = line.split(':');
         plan['Sector'] = parts[1]?.trim() || '';
@@ -80,38 +112,113 @@ export default function CleanLessonContent({ content }: CleanLessonContentProps)
       } else if (lower.includes('facilitation technique')) {
         currentSection = 'Facilitation technique(s)';
         plan[currentSection] = [];
-      } else if (lower.includes('introduction')) {
+      }
+      // Handle the new format sections
+      else if (lower.includes('introduction')) {
+        saveStep();
         currentSection = 'Introduction';
         plan[currentSection] = [];
+        resetStep();
       } else if (lower.includes('development') || lower.includes('body')) {
+        saveStep();
         currentSection = 'Development/Body';
         plan[currentSection] = [];
+        resetStep();
       } else if (lower.includes('conclusion')) {
+        saveStep();
         currentSection = 'Conclusion';
         plan[currentSection] = [];
+        resetStep();
       } else if (lower.includes('evaluation of the session')) {
+        saveStep();
         currentSection = 'Evaluation of the session';
         plan[currentSection] = [];
+        resetStep();
       } else if (lower.includes('homework') || lower.includes('assignment')) {
+        saveStep();
         currentSection = 'Homework/Assignment';
         plan[currentSection] = [];
+        resetStep();
       } else if (lower.includes('references')) {
+        saveStep();
         currentSection = 'References';
         plan[currentSection] = [];
+        resetStep();
       } else if (lower.includes('appendices')) {
+        saveStep();
         currentSection = 'Appendices';
         plan[currentSection] = [];
+        resetStep();
       } else if (lower.includes('reflection')) {
+        saveStep();
         currentSection = 'Reflection';
         plan[currentSection] = [];
-      } else if (currentSection && line.length > 0) {
-        if (Array.isArray(plan[currentSection])) {
-          plan[currentSection].push(line);
-        } else {
-          plan[currentSection] = [line];
+        resetStep();
+      }
+      // Detect steps in the new format
+      else if (cleanLine.match(/^step\s+\d+/i) || (lower.includes('step') && cleanLine.length < 30)) {
+        saveStep();
+        currentStep = cleanLine;
+      }
+      // Handle pipe-separated format for resources and duration
+      else if (cleanLine.includes('|')) {
+        const pipeParts = cleanLine.split('|').map(part => part.trim());
+        
+        pipeParts.forEach(part => {
+          if (part.toLowerCase().includes('duration:')) {
+            currentDuration = part;
+          } else if (part.toLowerCase().includes('resources:')) {
+            // Extract resources after Resources:
+            const resourcesText = part.replace(/resources:\s*/i, '');
+            if (resourcesText.trim()) {
+              // Split by bullet points
+              const resourceItems = resourcesText.split('•')
+                .map(item => item.trim())
+                .filter(item => item.length > 0);
+              currentResources = resourceItems;
+            }
+          } else if (part.length > 0 && !part.toLowerCase().includes('duration')) {
+            // This is activity content
+            tempContent += (tempContent ? ' ' : '') + part;
+          }
+        });
+      }
+      // Handle bullet points
+      else if (cleanLine.startsWith('•') || cleanLine.startsWith('-')) {
+        const cleanBullet = cleanLine.substring(1).trim();
+        if (currentSection) {
+          if (Array.isArray(plan[currentSection])) {
+            plan[currentSection].push(cleanBullet);
+          } else {
+            plan[currentSection] = [cleanBullet];
+          }
+        } else if (currentStep) {
+          currentActivities.push(cleanBullet);
+        }
+        tempContent += (tempContent ? ' ' : '') + cleanBullet;
+      }
+      // Handle trainer/learner activity markers
+      else if (cleanLine.includes("Trainer's activity") || cleanLine.includes("Learner's activity")) {
+        currentActivities.push(cleanLine);
+        tempContent += (tempContent ? ' ' : '') + cleanLine;
+      }
+      // Add other content
+      else if (cleanLine.length > 0) {
+        if (currentSection) {
+          if (Array.isArray(plan[currentSection])) {
+            plan[currentSection].push(cleanLine);
+          } else {
+            plan[currentSection] = [cleanLine];
+          }
+        } else if (currentStep) {
+          currentActivities.push(cleanLine);
+          tempContent += (tempContent ? ' ' : '') + cleanLine;
         }
       }
     });
+    
+    // Save the last step
+    saveStep();
     
     return plan;
   };
@@ -222,7 +329,7 @@ export default function CleanLessonContent({ content }: CleanLessonContentProps)
                 <th className="border border-gray-800 px-3 py-2 text-center font-semibold text-black" colSpan={3}>Introduction</th>
               </tr>
               <tr className="bg-gray-50">
-                <th className="border border-gray-800 px-3 py-2 text-left font-semibold text-black w-1/2"></th>
+                <th className="border border-gray-800 px-3 py-2 text-left font-semibold text-black w-1/2">Activities</th>
                 <th className="border border-gray-800 px-3 py-2 text-left font-semibold text-black w-1/3">Resources</th>
                 <th className="border border-gray-800 px-3 py-2 text-left font-semibold text-black w-1/6">Duration</th>
               </tr>
@@ -233,10 +340,35 @@ export default function CleanLessonContent({ content }: CleanLessonContentProps)
                   {renderValue(parsed['Introduction'])}
                 </td>
                 <td className="border border-gray-800 px-3 py-2 align-top text-black">
-                  {/* Resources would come from parsed data */}
+                  {/* Check if we have steps with resources */}
+                  {parsed['Steps'] && parsed['Steps'].some((step: any) => step.resources && step.resources.length > 0) ? (
+                    parsed['Steps']
+                      .filter((step: any) => step.resources && step.resources.length > 0)
+                      .map((step: any, index: number) => (
+                        <div key={index} className="mb-2">
+                          <div className="font-semibold text-sm">{step.title}</div>
+                          {step.resources.map((resource: string, resIndex: number) => (
+                            <div key={resIndex} className="text-sm">• {resource}</div>
+                          ))}
+                        </div>
+                      ))
+                  ) : (
+                    <span className="text-gray-400">No specific resources listed</span>
+                  )}
                 </td>
                 <td className="border border-gray-800 px-3 py-2 align-top text-sm text-black">
-                  {/* Duration would come from parsed data */}
+                  {parsed['Steps'] && parsed['Steps'].some((step: any) => step.duration) ? (
+                    parsed['Steps']
+                      .filter((step: any) => step.duration)
+                      .map((step: any, index: number) => (
+                        <div key={index} className="mb-1">
+                          <div className="font-semibold text-xs">{step.title}</div>
+                          <div>{step.duration}</div>
+                        </div>
+                      ))
+                  ) : (
+                    'Not specified'
+                  )}
                 </td>
               </tr>
             </tbody>
@@ -250,13 +382,47 @@ export default function CleanLessonContent({ content }: CleanLessonContentProps)
               <tr className="bg-gray-100">
                 <th className="border border-gray-800 px-3 py-2 text-center font-semibold text-black" colSpan={3}>Development/Body</th>
               </tr>
+              <tr className="bg-gray-50">
+                <th className="border border-gray-800 px-3 py-2 text-left font-semibold text-black w-1/2">Activities</th>
+                <th className="border border-gray-800 px-3 py-2 text-left font-semibold text-black w-1/3">Resources</th>
+                <th className="border border-gray-800 px-3 py-2 text-left font-semibold text-black w-1/6">Duration</th>
+              </tr>
             </thead>
             <tbody>
-              <tr>
-                <td className="border border-gray-800 px-3 py-2 align-top text-black" colSpan={3}>
-                  {renderValue(parsed['Development/Body'])}
-                </td>
-              </tr>
+              {/* Render steps if available */}
+              {parsed['Steps'] && parsed['Steps'].map((step: any, index: number) => (
+                <tr key={index}>
+                  <td className="border border-gray-800 px-3 py-2 align-top text-black">
+                    <div className="font-semibold mb-2">{step.title}</div>
+                    {step.activities && step.activities.map((activity: string, actIndex: number) => (
+                      <div key={actIndex} className="mb-1">• {activity}</div>
+                    ))}
+                    {step.content && !step.activities && (
+                      <div className="mb-1">{step.content}</div>
+                    )}
+                  </td>
+                  <td className="border border-gray-800 px-3 py-2 align-top text-black">
+                    {step.resources && step.resources.length > 0 ? (
+                      step.resources.map((resource: string, resIndex: number) => (
+                        <div key={resIndex} className="mb-1">• {resource}</div>
+                      ))
+                    ) : (
+                      <span className="text-gray-400">No resources</span>
+                    )}
+                  </td>
+                  <td className="border border-gray-800 px-3 py-2 align-top text-sm text-black">
+                    {step.duration || 'Not specified'}
+                  </td>
+                </tr>
+              ))}
+              {/* Fallback to regular content if no steps */}
+              {(!parsed['Steps'] || parsed['Steps'].length === 0) && (
+                <tr>
+                  <td className="border border-gray-800 px-3 py-2 align-top text-black" colSpan={3}>
+                    {renderValue(parsed['Development/Body'])}
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         )}
@@ -269,15 +435,46 @@ export default function CleanLessonContent({ content }: CleanLessonContentProps)
                 <th className="border border-gray-800 px-3 py-2 text-center font-semibold text-black" colSpan={3}>Conclusion</th>
               </tr>
               <tr className="bg-gray-50">
-                <th className="border border-gray-800 px-3 py-2 text-left font-semibold text-black w-1/2"></th>
+                <th className="border border-gray-800 px-3 py-2 text-left font-semibold text-black w-1/2">Activities</th>
                 <th className="border border-gray-800 px-3 py-2 text-left font-semibold text-black w-1/3">Resources</th>
                 <th className="border border-gray-800 px-3 py-2 text-left font-semibold text-black w-1/6">Duration</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td className="border border-gray-800 px-3 py-2 text-black" colSpan={3}>
+                <td className="border border-gray-800 px-3 py-2 text-black">
                   {renderValue(parsed['Conclusion'])}
+                </td>
+                <td className="border border-gray-800 px-3 py-2 align-top text-black">
+                  {/* Check if we have steps with resources */}
+                  {parsed['Steps'] && parsed['Steps'].some((step: any) => step.resources && step.resources.length > 0) ? (
+                    parsed['Steps']
+                      .filter((step: any) => step.resources && step.resources.length > 0)
+                      .map((step: any, index: number) => (
+                        <div key={index} className="mb-2">
+                          <div className="font-semibold text-sm">{step.title}</div>
+                          {step.resources.map((resource: string, resIndex: number) => (
+                            <div key={resIndex} className="text-sm">• {resource}</div>
+                          ))}
+                        </div>
+                      ))
+                  ) : (
+                    <span className="text-gray-400">No specific resources listed</span>
+                  )}
+                </td>
+                <td className="border border-gray-800 px-3 py-2 align-top text-sm text-black">
+                  {parsed['Steps'] && parsed['Steps'].some((step: any) => step.duration) ? (
+                    parsed['Steps']
+                      .filter((step: any) => step.duration)
+                      .map((step: any, index: number) => (
+                        <div key={index} className="mb-1">
+                          <div className="font-semibold text-xs">{step.title}</div>
+                          <div>{step.duration}</div>
+                        </div>
+                      ))
+                  ) : (
+                    'Not specified'
+                  )}
                 </td>
               </tr>
             </tbody>
