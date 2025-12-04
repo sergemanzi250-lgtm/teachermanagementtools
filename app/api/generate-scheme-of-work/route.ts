@@ -26,10 +26,10 @@ export async function POST(request: NextRequest) {
     const prompt = generateSchemeOfWorkPrompt({
       subject,
       className: className || grade,
-      weeks,
+      numberOfWeeks: weeks,
       topics: Array.isArray(topics) ? topics : topics.split(',').map((t: string) => t.trim()),
       term,
-      competencies,
+      learningObjectives: competencies,
       additionalNotes,
     });
 
