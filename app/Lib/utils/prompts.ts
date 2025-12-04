@@ -1,7 +1,8 @@
 /**
- * AI Prompt Generator Utility
+ * AI Prompt Generator Utility - COMPLETE UPDATED VERSION
  * Helps guide AI to provide contextual data based on user form inputs
  * This system creates structured prompts that ensure consistent, relevant responses
+ * Updated to match Rwanda Education Board (REB/RTB/Nursery) standard formats
  */
 
 import { 
@@ -56,31 +57,32 @@ RESPONSE INSTRUCTIONS:
   const formatSpecificInstructions: Record<string, string> = {
     REB: `
 SPECIFIC FOR REB LESSON PLANS:
-- Follow the 7-step REB lesson plan format
-- Include Key Unity Competence explicitly
-- Add Generic Competencies section
+- Follow the standard REB lesson plan format with timing table
+- Include Key Unit Competence explicitly
+- Add Generic Competencies and cross-cutting issues
 - Include Teaching and Learning Activities (separate teacher and learner activities)
 - Add Assessment methods with clear tools
-- Include timing for each step (Introduction, Development, Consolidation, Evaluation)
+- Include timing for each step (Introduction, Development, Conclusion)
 - Specify special educational needs considerations
 `,
     RTB: `
 SPECIFIC FOR RTB SESSION PLANS:
-- Focus on practical, hands-on activities
+- Focus on practical, hands-on activities for TVET
 - Include equipment and safety considerations
 - Emphasize technical competencies development
 - Add reflection and follow-up points
 - Include assessment criteria for vocational skills
 - Provide realistic workplace context
+- Include Conclusion with Summary, Assessment, Evaluation, and Homework
 `,
     NURSERY: `
 SPECIFIC FOR NURSERY LESSON PLANS:
 - Use play-based learning approach
 - Focus on developmental areas (Cognitive, Physical, Social, Emotional, Language)
 - Age-appropriate language and activities
-- Include 2-3 main activities with specific durations
+- Include activities with specific durations in table format
 - Add observation points for continuous assessment
-- Provide parent involvement suggestions
+- Keep it simple and child-friendly
 `,
     ACTIVITY: `
 SPECIFIC FOR ACTIVITIES:
@@ -172,125 +174,91 @@ ${input.cross_cutting_issues ? `- Cross-Cutting Issues: ${input.cross_cutting_is
 TASK:
 Generate a comprehensive, REB-compliant lesson plan using ONLY the information provided above.
 
-IMPORTANT: Format the lesson plan as a structured HTML table with clear sections, similar to this example:
+CRITICAL: You must follow the EXACT format shown in the reference REB lesson plan. The format must include:
 
-<table border="1" cellpadding="5" cellspacing="0" width="100%">
-  <tr>
-    <th colspan="4" align="center">LESSON PLAN</th>
-  </tr>
-  <tr>
-    <td width="25%"><strong>School:</strong> [School Name]</td>
-    <td width="25%"><strong>Subject:</strong> [Subject]</td>
-    <td width="25%"><strong>Level:</strong> [Class Level]</td>
-    <td width="25%"><strong>Date:</strong> [Date]</td>
-  </tr>
-  <tr>
-    <td><strong>Teacher name:</strong> [Teacher Name]</td>
-    <td colspan="3"><strong>Term:</strong> [Term]</td>
-  </tr>
-  <tr>
-    <td><strong>Module title:</strong> [Module Title]</td>
-    <td><strong>Week:</strong> [Week Number]</td>
-    <td><strong>No. Trainees:</strong> [Class Size]</td>
-    <td><strong>Class:</strong> [Class Name]</td>
-  </tr>
-  <tr>
-    <td colspan="4"><strong>Learning Outcome:</strong> [Learning Outcome]</td>
-  </tr>
-  <tr>
-    <td colspan="4"><strong>Indicative content:</strong> [Content Description]</td>
-  </tr>
-  <tr>
-    <td colspan="2"><strong>Topic of the session:</strong> [Topic]</td>
-    <td colspan="2"><strong>Duration of the session:</strong> ${input.duration} minutes</td>
-  </tr>
-  <tr>
-    <td colspan="4"><strong>Range:</strong> [Range Description]</td>
-  </tr>
-  <tr>
-    <td colspan="4"><strong>Objectives:</strong><br>
-    1. [Objective 1]<br>
-    2. [Objective 2]</td>
-  </tr>
-  <tr>
-    <td colspan="4"><strong>Facilitation technique(s):</strong><br>
-    [Techniques]</td>
-  </tr>
-  <tr>
-    <td colspan="1" bgcolor="#FFFFCC"><strong>Introduction</strong></td>
-    <td colspan="1" bgcolor="#FFFFCC"><strong>Resources</strong></td>
-    <td colspan="1" bgcolor="#FFFFCC"><strong>Duration</strong></td>
-  </tr>
-  <tr>
-    <td>
-      <strong>Trainer's activity</strong><br>
-      • [Activity 1]<br>
-      • [Activity 2]<br>
-      <br>
-      <strong>Learner's activity</strong><br>
-      • [Activity 1]<br>
-      • [Activity 2]
-    </td>
-    <td>
-      • [Resource 1]<br>
-      • [Resource 2]
-    </td>
-    <td>[Duration] minutes</td>
-  </tr>
-  <tr>
-    <td colspan="3" bgcolor="#FFFFCC"><strong>Development/Body</strong></td>
-  </tr>
-  <tr>
-    <td>
-      <strong>Step 1</strong><br>
-      <strong>Trainer's activity</strong><br>
-      • [Activity 1]<br>
-      • [Activity 2]<br>
-      <br>
-      <strong>Learner's activity</strong><br>
-      • [Activity 1]<br>
-      • [Activity 2]
-    </td>
-    <td>
-      • [Resource 1]<br>
-      • [Resource 2]
-    </td>
-    <td>[Duration] minutes</td>
-  </tr>
-  <tr>
-    <td>
-      <strong>Step 2</strong><br>
-      <strong>Trainer's activity</strong><br>
-      • [Activity 1]<br>
-      • [Activity 2]<br>
-      <br>
-      <strong>Learner's activity</strong><br>
-      • [Activity 1]<br>
-      • [Activity 2]
-    </td>
-    <td>
-      • [Resource 1]<br>
-      • [Resource 2]
-    </td>
-    <td>[Duration] minutes</td>
-  </tr>
-</table>
+1. Title "LESSON PLAN" centered at top
+2. Basic information table showing School, Teacher, Term, Date, Subject, Class, Unit No, Lesson No, Duration, Class size
+3. Special educational needs section
+4. Unit title, Key unit competence, Title of the lesson
+5. Instructional objectives
+6. Plan of this class (Location)
+7. Learning materials
+8. References
+9. Detailed timing table with three columns: Timing, Description of activities (Teacher's activity and Learner's activity), Generic competence and cross-cutting issues
+10. Teacher's self-evaluation section at the end
 
-Include all the following sections in your table:
-1. Header information (School, Subject, Level, Date, Teacher, Term)
-2. Module information (Title, Week, Class size, Class name)
-3. Learning Outcome
-4. Indicative content
-5. Topic and Duration
-6. Range
-7. Objectives (numbered list)
-8. Facilitation techniques
-9. Introduction section with Trainer's activities, Learner's activities, Resources, and Duration
-10. Development/Body section with multiple steps, each containing Trainer's activities, Learner's activities, Resources, and Duration
+IMPORTANT: Format the lesson plan as a structured document matching this exact layout:
 
-Use bullet points (•) for listing activities and resources. Use appropriate background colors for section headers (light yellow #FFFFCC for main sections).
+Structure your response as follows:
 
-Generate the lesson plan in this structured HTML table format ready for teacher use.`;
+**LESSON PLAN** (Centered heading)
+
+**Basic Information Table:**
+| School name: ${input.schoolName} | Teacher's name: ${input.teacherName} |
+| Term | Date | Subject | Class | Unit No | Lesson No | Duration | Class size |
+| ${input.term} | [Current Date] | ${input.subject} | ${input.className} | ${input.lessonUnit} | ${input.lessonNumber} | ${input.duration} min | [Class Size] |
+
+**Type of special educational needs to be catered for in this lesson and number of learners in each category**
+${input.type_of_special_educational_needs || '3 slow learners'}
+
+**Unit title**
+${input.key_unity_competence}
+
+**Key unit competence**
+${input.key_unity_competence}
+
+**Title of the lesson**
+${input.title}
+
+**Instructional objectives**
+[Generate 2-3 specific, measurable objectives based on the lesson title and key competence. Format: "1. Using the given..., students will be able to... 2. Using..., students will be able to..."]
+
+**Plan of this class (Location)**
+${input.location || 'Inside smart classroom'}
+
+**Learning materials**
+${input.learning_materials}
+
+**References**
+• Rwanda Education Board (REB) ${input.subject} Teacher's Guide, 2023
+• REB ${input.subject} Learner's Book, 2023
+• [Add 1-2 more relevant references]
+
+---
+
+**TIMING AND ACTIVITIES TABLE:**
+
+| **Timing for each step** | **Description of teaching and learning activities** | **Generic competence and cross-cutting issues addressed - a short explanation** |
+|--------------------------|-----------------------------------------------------|-------------------------------------------------------------------------------|
+| **Introduction (10 min)** | **Teacher's activity**<br>- [Introduce topic with examples]<br>- [Facilitate discussions about real-world applications]<br>- [Share previous knowledge about topic]<br><br>**Learner's activity**<br>- [Discuss importance of topic]<br>- [Share previous knowledge about topic] | **Generic Competencies:**<br>- ${input.general_competencies || 'Critical Thinking: Analyzing topic'}<br>- Gender Education: Encouraging diverse participation and skills<br>- Environment and Sustainability: [Relate to topic if applicable] |
+| **Development (55 min)** | **Teacher's activity**<br>- [Guide students through main concept with coding exercises]<br>- [Monitor pair activities and provide feedback]<br>- [Discuss common errors and solutions]<br><br>**Learner's activity**<br>- [Practice main activity in pairs]<br>- [Test concepts on sample data]<br>- [Analyze results and discuss improvements] | **Generic Competencies:**<br>- Research and Problem Solving: Investigating concepts<br>- ${input.general_competencies || 'Critical Thinking: Analyzing efficiency'}<br>- Environment and Sustainability: Exploring implications of efficient resource management |
+| **Conclusion (15 min)** | **Teacher's activity**<br>- [Summarize key points of the lesson]<br>- [Conduct a brief quiz on concepts]<br><br>**Learner's activity**<br>- [Present findings from activities]<br>- [Reflect on the lesson and discuss takeaways] | **Generic Competencies:**<br>- Lifelong Learning: Encouraging students to explore more<br>- Standardization Culture: Promoting accuracy in implementation |
+
+---
+
+**Teacher's self-evaluation:**
+[Leave blank - to be filled after lesson delivery]
+
+---
+
+CRITICAL FORMATTING REQUIREMENTS:
+1. Use the exact section structure shown above
+2. Include basic information table with all required fields
+3. Include special educational needs section
+4. Include unit title, key unit competence, and lesson title as separate rows
+5. List instructional objectives (2-3 specific objectives)
+6. Specify plan of class (location)
+7. List learning materials
+8. Provide 3-4 references relevant to the subject
+9. Create detailed timing table with THREE sections: Introduction, Development, Conclusion
+10. Each timing section must show Teacher's activity and Learner's activity
+11. Third column must show Generic competence and cross-cutting issues with specific explanations
+12. Include Teacher's self-evaluation section at the end (blank)
+13. Use bullet points (-) for all activity lists
+14. Ensure timing adds up to ${input.duration} minutes total
+15. Base all content strictly on user's provided inputs
+
+Generate the complete lesson plan now.`;
 };
 
 // ============================================================================
@@ -329,125 +297,172 @@ USER PROVIDED INFORMATION:
 TASK:
 Generate a professional RTB-compliant TVET session plan using ONLY the information provided above.
 
-IMPORTANT: Format the session plan as a structured HTML table with clear sections, similar to this example:
+CRITICAL: You must follow the EXACT format shown in the reference RTB session plan. The format must include:
 
-<table border="1" cellpadding="5" cellspacing="0" width="100%">
-  <tr>
-    <th colspan="4" align="center">SESSION PLAN</th>
-  </tr>
-  <tr>
-    <td width="25%"><strong>Sector:</strong> [Sector]</td>
-    <td width="25%"><strong>Trade:</strong> [Trade]</td>
-    <td width="25%"><strong>Level:</strong> [Level]</td>
-    <td width="25%"><strong>Date:</strong> [Date]</td>
-  </tr>
-  <tr>
-    <td><strong>Trainer name:</strong> [Trainer Name]</td>
-    <td colspan="3"><strong>Term:</strong> [Term]</td>
-  </tr>
-  <tr>
-    <td><strong>Module title:</strong> [Module Title]</td>
-    <td><strong>Week:</strong> [Week Number]</td>
-    <td><strong>No. Trainees:</strong> [Class Size]</td>
-    <td><strong>Class:</strong> [Class Name]</td>
-  </tr>
-  <tr>
-    <td colspan="4"><strong>Learning Outcome:</strong> [Learning Outcome]</td>
-  </tr>
-  <tr>
-    <td colspan="4"><strong>Indicative content:</strong> [Content Description]</td>
-  </tr>
-  <tr>
-    <td colspan="2"><strong>Topic of the session:</strong> [Topic]</td>
-    <td colspan="2"><strong>Duration of the session:</strong> ${input.duration} minutes</td>
-  </tr>
-  <tr>
-    <td colspan="4"><strong>Range:</strong> [Range Description]</td>
-  </tr>
-  <tr>
-    <td colspan="4"><strong>Objectives:</strong><br>
-    1. [Objective 1]<br>
-    2. [Objective 2]</td>
-  </tr>
-  <tr>
-    <td colspan="4"><strong>Facilitation technique(s):</strong><br>
-    [Techniques]</td>
-  </tr>
-  <tr>
-    <td colspan="1" bgcolor="#FFFFCC"><strong>Introduction</strong></td>
-    <td colspan="1" bgcolor="#FFFFCC"><strong>Resources</strong></td>
-    <td colspan="1" bgcolor="#FFFFCC"><strong>Duration</strong></td>
-  </tr>
-  <tr>
-    <td>
-      <strong>Trainer's activity</strong><br>
-      • [Activity 1]<br>
-      • [Activity 2]<br>
-      <br>
-      <strong>Learner's activity</strong><br>
-      • [Activity 1]<br>
-      • [Activity 2]
-    </td>
-    <td>
-      • [Resource 1]<br>
-      • [Resource 2]
-    </td>
-    <td>[Duration] minutes</td>
-  </tr>
-  <tr>
-    <td colspan="3" bgcolor="#FFFFCC"><strong>Development/Body</strong></td>
-  </tr>
-  <tr>
-    <td>
-      <strong>Step 1</strong><br>
-      <strong>Trainer's activity</strong><br>
-      • [Activity 1]<br>
-      • [Activity 2]<br>
-      <br>
-      <strong>Learner's activity</strong><br>
-      • [Activity 1]<br>
-      • [Activity 2]
-    </td>
-    <td>
-      • [Resource 1]<br>
-      • [Resource 2]
-    </td>
-    <td>[Duration] minutes</td>
-  </tr>
-  <tr>
-    <td>
-      <strong>Step 2</strong><br>
-      <strong>Trainer's activity</strong><br>
-      • [Activity 1]<br>
-      • [Activity 2]<br>
-      <br>
-      <strong>Learner's activity</strong><br>
-      • [Activity 1]<br>
-      • [Activity 2]
-    </td>
-    <td>
-      • [Resource 1]<br>
-      • [Resource 2]
-    </td>
-    <td>[Duration] minutes</td>
-  </tr>
-</table>
+1. HEADER with RTB logo positioning
+2. Title "SESSION PLAN" centered at top
+3. Basic information table with merged cells
+4. Detailed session structure with Introduction, Development/Body steps, Conclusion sections
+5. Each section must show Trainer's activity, Learner's activity, Resources, and Duration
+6. Conclusion section with Summary, Assessment, Evaluation, and Homework/Assignment
+7. References section
+8. Appendices section
+9. Reflection section at the end
 
-Include all the following sections in your table:
-1. Header information (Sector, Trade, Level, Date, Trainer, Term)
-2. Module information (Title, Week, Class size, Class name)
-3. Learning Outcome
-4. Indicative content
-5. Topic and Duration
-6. Range
-7. Objectives (numbered list)
-8. Facilitation techniques
-9. Introduction section with Trainer's activities, Learner's activities, Resources, and Duration
-10. Development/Body section with multiple steps, each containing Trainer's activities, Learner's activities, Resources, and Duration
+IMPORTANT: Format the session plan as a structured document matching this exact layout:
 
-Use bullet points (•) for listing activities and resources. Use appropriate background colors for section headers (light yellow #FFFFCC for main sections).
+Structure your response as follows:
 
-Generate the session plan in this structured HTML table format ready for trainer use.`;
+**SESSION PLAN** (Centered heading with RTB logo on right)
+
+**Basic Information Table:**
+| Sector: [Sector] | Trade: [Trade] | Level: [Level] | Date: [Date] |
+| Trainer name: [Name] | | | Term: [Term] |
+| Module title: [Title] | Week: [#] | No. Trainees: [#] | Class: [Class] |
+
+**Learning Outcome:**
+[LO3 or appropriate learning outcome]
+
+**Indicative content**
+[Content description from user input]
+
+**Topic of the session:** [Topic from user input]
+
+**Range:**
+[Range description - provide bullet points describing scope]
+• [Range point 1]
+
+**Objectives:**
+1. [Specific objective 1 related to topic]
+2. [Specific objective 2 related to topic]
+
+**Facilitation technique(s):**
+[Demonstration and Group Discussion or specified technique]
+
+---
+
+**INTRODUCTION** | **Resources** | **Duration**
+
+**Trainer's activity**
+• [Greet learners activity]
+• [Take roll call]
+• [Involve learners in setting ground rules]
+• [Announce topic]
+• [Present and explain objectives]
+
+**Learner's activity**
+• [Respond to greetings]
+• [Respond to roll call]
+• [Participate in setting ground rules]
+• [Listen to new topic]
+• [Follow objectives]
+
+| Resources: • Chalk • Chalkboard • Attendance sheet • Teaching aids related to [topic] | Duration: [6 minutes or appropriate] |
+
+---
+
+**Development/Body**
+
+**Step 1**
+**Trainer's activity**
+• [Introduce and explain main concept]
+• [Discuss importance of topic]
+
+**Learner's activity**
+• [Take notes on concept]
+• [Participate in discussion]
+
+| Resources: • Teaching materials for different methods • Role-playing scenarios • Writing materials for note-taking | Duration: [2 minutes or appropriate] |
+
+**Step 2**
+**Trainer's activity**
+• [Conduct demonstration]
+• [Engage learners in group discussion]
+
+**Learner's activity**
+• [Observe demonstration]
+• [Contribute to group discussion]
+
+| Resources: • Teaching materials • Role-playing scenarios • Writing materials | Duration: [1 minute or appropriate] |
+
+**Step 3**
+**Trainer's activity**
+• [Facilitate role-playing activity]
+• [Provide guidance and feedback]
+
+**Learner's activity**
+• [Participate in role-playing]
+• [Accept and apply feedback]
+
+| Resources: • Teaching materials • Role-playing scenarios • Writing materials | Duration: [1 minute or appropriate] |
+
+**Step 4**
+**Trainer's activity**
+• [Summarize key points]
+• [Prepare learners for assessment]
+
+**Learner's activity**
+• [Engage in summary discussion]
+• [Get ready for assessment]
+
+| Resources: • Teaching materials • Role-playing scenarios • Writing materials | Duration: [1 minute or appropriate] |
+
+**Resources for ALL steps:**
+• Teaching materials for different methods
+• Role-playing scenarios
+• Writing materials for note-taking
+
+---
+
+**Conclusion** | **Resources** | **Duration**
+
+**Summary:**
+Trainer involves learners in summarizing the session by asking questions related to objectives while learners participate by answering questions
+
+| Resources: • Assessment sheets • Chalk | Duration: [13 minutes] |
+
+**Assessment:**
+Trainer gives instructions related to assessment, distributes assessment sheets, while learners receive and complete the assessment
+
+| Resources: • Assessment sheets • Chalk | Duration: [13 minutes] |
+
+**Evaluation of the session:**
+Trainer asks trainees to give feedback on the session delivery and announce the next topic while learners evaluate the session by answering asked questions.
+
+| Resources: • Evaluation forms • Flip/pencil | Duration: [3 minutes] |
+
+**Homework/Assignment:**
+Practice the skills taught. Complete exercises in the workbook.
+
+| Resources: • Textbook • Workbook | Duration: [5 minutes] |
+
+---
+
+**References:**
+• [Reference 1 - relevant to topic]
+• [Reference 2 - relevant textbook]
+• [Reference 3 - relevant guide]
+
+**Appendices:** Task sheet, Handout notes, Assessment sheet
+
+**Reflection:**
+To be completed after the session delivery
+
+---
+
+CRITICAL FORMATTING REQUIREMENTS:
+1. Use the exact section structure shown above
+2. Include ALL sections: Introduction, Development (Steps 1-4), Conclusion (with Summary, Assessment, Evaluation, Homework)
+3. Each section must show Trainer's activity, Learner's activity, Resources, and Duration in a clear tabular format
+4. Use bullet points (•) for all activity lists
+5. Include specific resources relevant to the topic
+6. Provide realistic time allocations that add up to ${input.duration} minutes total
+7. Add References section with 3-4 relevant citations
+8. Include Appendices and Reflection sections at the end
+9. Maintain professional TVET/vocational training tone throughout
+10. Base all content strictly on the user's provided inputs - especially the topic, learning outcomes, and indicative content
+
+Generate the complete session plan now.`;
 };
 
 // ============================================================================
@@ -480,79 +495,82 @@ USER PROVIDED INFORMATION:
 - Observation Points: ${input.observationPoints}
 
 TASK:
-Generate a play-based, age-appropriate nursery lesson plan using ONLY the information provided above. Structure it with:
+Generate a play-based, age-appropriate nursery lesson plan using ONLY the information provided above.
 
-1. LESSON OVERVIEW
-   - Theme: ${input.theme}
-   - Age Group: ${input.ageGroup}
-   - Duration: ${input.duration} minutes
-   - Teacher: ${input.teacherName}
-   - School: ${input.schoolName}
+CRITICAL: You must follow the EXACT format shown in the reference nursery lesson plan. The format must include:
 
-2. LEARNING OBJECTIVES
-   Age-appropriate objectives:
-   - ${input.learningObjectives}
-   - Clear, observable outcomes
+1. Title "NURSERY LESSON PLAN" centered at top
+2. Lesson title (e.g., "Lesson: colors")
+3. Learning objectives section
+4. Teaching and learning materials section (bullet list)
+5. References section (bullet list)
+6. Main table with 4 columns: Steps and timing, Teacher's activities, Learner's activities, Teaching and learning resources
+7. The table should have rows for: Introduction, Lesson development, Conclusion or summary, Evaluation/exercise/homework
+8. Teacher's self evaluation section at the end
 
-3. DEVELOPMENTAL AREAS COVERED
-   - ${input.developmentalAreas}
-   - How each area will be developed
+IMPORTANT: Format the lesson plan as a structured document matching this exact layout:
 
-4. MATERIALS AND RESOURCES
-   - List all materials needed for activities
-   - Safety check for materials
-   - Setup instructions
+Structure your response as follows:
 
-5. INTRODUCTION ACTIVITY (5-10 minutes)
-   - Activity: ${input.introductionActivity}
-   - Engagement strategy
-   - Transition to main activities
+**NURSERY LESSON PLAN**
 
-6. MAIN PLAY-BASED ACTIVITIES (15-25 minutes total)
-   Detailed activities from user input:
-   - ${input.mainActivities}
-   
-   For EACH activity provide:
-   - Activity name and description
-   - Specific duration
-   - Step-by-step instructions
-   - Materials needed
-   - How children engage in play
-   - Learning happening through play
-   - Supervision/safety points
+**Lesson:** ${input.theme}
 
-7. PLAY-BASED LEARNING APPROACH
-   - Incorporating: ${input.playBasedLearning}
-   - How children learn through play in these activities
-   - Teacher's role as facilitator
+**Learning objectives:**
 
-8. CLOSING/REFLECTION ACTIVITY (5 minutes)
-   - Activity: ${input.closingActivity}
-   - Wrap-up strategy
-   - Reflection questions for children
+${input.learningObjectives}
 
-9. OBSERVATION AND ASSESSMENT POINTS
-   - What to observe: ${input.observationPoints}
-   - Observable indicators of learning
-   - Documentation strategies (photos, notes, checklist)
+**Teaching and learning materials:**
 
-10. DIFFERENTIATION AND INCLUSION
-    - Adaptations for different abilities
-    - Including children with diverse needs
-    - Multiple ways to engage
+• [Material 1 from user input]
+• [Material 2 from user input]
+• [Material 3 from user input]
 
-11. HOME EXTENSION ACTIVITIES
-    - Suggestions for parents to extend learning at home
-    - Simple activities with household items
-    - Parent communication tips
+**References:**
 
-12. TEACHER NOTES
-    - Tips for smooth transitions
-    - Classroom management strategies
-    - Handling challenging behaviors
-    - Resources and references
+• Early Childhood Education Curriculum Guide
+• Teaching Young Children: A Handbook for Educators
 
-Generate the lesson plan in clear, engaging, structured format ready for nursery teacher use. Use child-friendly language and focus on joyful, playful learning.`;
+---
+
+**MAIN ACTIVITY TABLE:**
+
+| **Steps and timing** | **Teacher's activities** | **Learner's activities** | **Teaching and learning resources** |
+|----------------------|--------------------------|-------------------------|-------------------------------------|
+| **Introduction**<br>(5 min) | The teacher will introduce ${input.theme} using flashcards and encourage children to talk about names of ${input.theme}. | Children will observe ${input.theme} flashcards and repeat the names of the ${input.theme} aloud. | • ${input.theme} flashcards<br>• ${input.theme} song<br>• Interactive ${input.theme} wheel |
+| **Lesson development**<br>(20 min) | The teacher will guide children in sorting activities, provide prompts for ${input.theme} identification, and assist in the scavenger hunt. | Children will sort colored paper and crayons into groups, color pictures, and search for objects of specific ${input.theme} around the classroom. | • Sorting bins<br>• Coloring sheets<br>• Classroom objects in different ${input.theme}<br>• ${input.theme} scavenger hunt checklist<br>• ${input.theme} song<br>• Interactive ${input.theme} game |
+| **Conclusion or summary**<br>(3 min) | The teacher will encourage children to present their work and ask questions about their favorite ${input.theme}. | Children will share their favorite ${input.theme} and show their colored pictures to the group. | • Children's coloring artwork<br>• ${input.theme} display board<br>• Congratulations stickers |
+| **Evaluation/exercise/homework**<br>(2 min) | The teacher will observe children's ability to identify ${input.theme} during the matching game and provide feedback. | Children will participate in a quick ${input.theme} matching game using flashcards to assess their understanding. | • ${input.theme} flashcards<br>• Observation checklist<br>• ${input.theme} matching game |
+
+---
+
+**Teacher's self evaluation:**
+
+[Leave blank - to be filled after lesson delivery]
+
+---
+
+CRITICAL FORMATTING REQUIREMENTS:
+1. Use the exact section structure shown above
+2. Title should be "NURSERY LESSON PLAN" centered at top
+3. Include lesson title (based on theme)
+4. Include learning objectives in paragraph form
+5. List teaching and learning materials as bullet points
+6. Include 2 references
+7. Create a 4-column table with these rows:
+   - Introduction (with timing)
+   - Lesson development (with timing)
+   - Conclusion or summary (with timing)
+   - Evaluation/exercise/homework (with timing)
+8. Each row must have: Steps and timing, Teacher's activities, Learner's activities, Teaching and learning resources
+9. Use bullet points (•) for listing resources in the last column
+10. Ensure total timing adds up to ${input.duration} minutes
+11. Include Teacher's self evaluation section at the end (blank)
+12. Make all activities age-appropriate for ${input.ageGroup}
+13. Focus on play-based, hands-on learning activities
+14. Base all content strictly on user's provided inputs - especially theme, activities, and materials
+
+Generate the complete nursery lesson plan now.`;
 };
 
 // ============================================================================
@@ -807,43 +825,39 @@ Generate a comprehensive, measurable rubric using ONLY the information provided 
 
 2. PERFORMANCE LEVEL DEFINITIONS
    Define ${levels} clear levels (e.g., Excellent, Good, Satisfactory, Needs Improvement):
-   - Level descriptors
-   - What each level means
-   - General characteristics
+   - Level 4 (Exemplary): [Clear descriptor]
+   - Level 3 (Proficient): [Clear descriptor]
+   - Level 2 (Developing): [Clear descriptor]
+   - Level 1 (Beginning): [Clear descriptor]
 
-3. ASSESSMENT CRITERIA
-   For EACH of these skills (${input.skills.length} total):
-   - ${input.skills.join('\n   - ')}
-   
-   For EACH skill, create ${levels} performance levels with:
-   - Clear descriptor of work at this level
-   - Specific, observable behaviors
-   - ${totalPts / input.skills.length / levels} points per level
-   - Examples of work at this level
+3. RUBRIC TABLE
+   Create a comprehensive table with:
+   - Rows: Each skill from ${input.skills.join(', ')}
+   - Columns: Each performance level (${levels} levels)
+   - Cells: Specific, observable descriptors for each skill-level combination
+   - Point values: Distribute points appropriately across levels
 
-4. DETAILED RUBRIC TABLE
-   
-   Criteria | Excellent (${totalPts / input.skills.length / levels} pts) | Good (${totalPts / input.skills.length / levels * (levels - 1) / levels} pts) | Satisfactory (${totalPts / input.skills.length / levels * (levels - 2) / levels} pts) | Needs Improvement (${totalPts / input.skills.length / levels * (levels - 3) / levels} pts)
-   [For each skill, provide specific descriptors]
+4. ASSESSMENT CRITERIA FOR EACH SKILL:
+${input.skills.map((skill) => `
+   **${skill}:**
+   - Level 4 (${Math.floor(totalPts / levels)} points): [Exemplary performance description]
+   - Level 3 (${Math.floor(totalPts / levels) - 1} points): [Proficient performance description]
+   - Level 2 (${Math.floor(totalPts / levels) - 2} points): [Developing performance description]
+   - Level 1 (${Math.floor(totalPts / levels) - 3} points): [Beginning performance description]`).join('')}
 
-5. SCORING GUIDE
-   - How to use the rubric
-   - How to score each criterion
-   - How to calculate total score
-   - Grade conversion (if applicable)
+5. SCORING GUIDELINES
+   - How to calculate total scores
+   - Grade boundaries (if applicable)
+   - What each score range means
+   - Feedback suggestions for each level
 
-6. TEACHER GUIDANCE
-   - What to look for in each level
-   - Common mistakes in scoring
-   - How to provide feedback to students
-   - How to use results for instruction
+6. TEACHER IMPLEMENTATION NOTES
+   - How to use this rubric effectively
+   - Common scoring challenges
+   - Tips for consistent assessment
+   - Student self-assessment opportunities
 
-7. STUDENT-FRIENDLY VERSION
-   - Simplified language
-   - What students need to do to earn points
-   - Clear expectations
-
-Generate the rubric in professional format ready for teacher use and student communication.`;
+Generate the rubric in clear, professional format that teachers can use immediately for assessment.`;
 };
 
 // ============================================================================
@@ -853,10 +867,12 @@ Generate the rubric in professional format ready for teacher use and student com
 export const generateSchemeOfWorkPrompt = (input: {
   subject: string;
   className: string;
-  weeks: number;
+  term: string;
+  numberOfWeeks: number;
   topics: string[];
-  term?: string;
-  competencies?: string;
+  learningObjectives?: string;
+  assessments?: string;
+  resources?: string;
   additionalNotes?: string;
 }): string => {
   const systemContext = getSystemContext('Scheme of Work');
@@ -872,208 +888,168 @@ ${constraints}
 USER PROVIDED INFORMATION:
 - Subject: ${input.subject}
 - Class/Grade: ${input.className}
-- Duration: ${input.weeks} weeks
+- Term: ${input.term}
+- Number of Weeks: ${input.numberOfWeeks}
 - Topics to Cover: ${input.topics.join(', ')}
-${input.term ? `- Term: ${input.term}` : ''}
-${input.competencies ? `- Key Competencies: ${input.competencies}` : ''}
+- Learning Objectives: ${input.learningObjectives || 'Derive from subject and topics'}
+- Assessments: ${input.assessments || 'Include formative and summative assessments'}
+- Resources: ${input.resources || 'Standard classroom resources'}
 ${input.additionalNotes ? `- Additional Notes: ${input.additionalNotes}` : ''}
 
 TASK:
 Generate a comprehensive scheme of work using ONLY the information provided above. Structure it with:
 
-1. SCHEME OF WORK HEADER
+1. SCHEME OVERVIEW
    - Subject: ${input.subject}
-   - Grade/Class: ${input.className}
-   - Duration: ${input.weeks} weeks
-   - Topics: ${input.topics.length} main topics
-${input.term ? `   - Term: ${input.term}` : ''}
+   - Class: ${input.className}
+   - Term: ${input.term}
+   - Duration: ${input.numberOfWeeks} weeks
+   - Total Topics: ${input.topics.length}
 
-2. OVERVIEW/INTRODUCTION
-   - Subject overview
-   - Overall learning goals
-   - How topics connect
+2. LEARNING OBJECTIVES
+   - Overall objectives for the term
+   - How topics build on each other
+   - Competency alignment
 
-3. WEEK-BY-WEEK BREAKDOWN
-   For each of ${input.weeks} weeks:
-   
-   WEEK [Number]:
-   - Topics covered: [From user list]
-   - Learning Outcomes: Specific, measurable outcomes
-   - Key Competencies: Developed in this week
-   - Teaching/Learning Activities: Specific strategies
-   - Materials and Resources Needed
-   - Assessment Methods:
-     * Formative assessments
-     * How to check understanding
-   - Homework/Extension: Practice and reinforcement
-   - Cross-Cutting Issues: Gender, inclusion, environment, etc.
-   - Notes: Teacher guidance for the week
+3. WEEKLY BREAKDOWN
+   Create a detailed table with ${input.numberOfWeeks} rows:
+   | Week | Topic | Learning Objectives | Activities | Assessment | Resources |
+   |------|-------|-------------------|------------|------------|-----------|
+   ${Array.from({length: input.numberOfWeeks}, (_, i) => `| Week ${i + 1} | ${input.topics[i] || 'Topic ' + (i + 1)} | [Objectives for this week] | [Key activities] | [Assessment method] | [Required resources] |`).join('\n   ')}
 
-4. TOPICS DISTRIBUTION
-   - When each topic is taught
-   - Time allocation per topic
-   - Connections between topics
+4. ASSESSMENT SCHEDULE
+   - Formative assessments throughout the term
+   - Summative assessments at term end
+   - Assessment methods and timing
+   - Weighting of different assessments
 
-5. ASSESSMENT SCHEDULE
-   - Formative assessments each week
-   - Summative assessment dates
-   - Assessment methods
-   - Grading criteria
+5. RESOURCE REQUIREMENTS
+   - Essential resources for each topic
+   - Optional/enrichment resources
+   - Budget considerations
+   - Preparation timeline
 
-6. RESOURCES AND MATERIALS
-   - Resources needed throughout term
-   - Where to source materials
-   - Digital resources
-   - Library books/references
+6. CROSS-CUTTING INTEGRATION
+   - How topics connect across weeks
+   - Skills development progression
+   - Real-world applications
+   - Cultural relevance to Rwanda
 
 7. DIFFERENTIATION STRATEGIES
-   - For high achievers
-   - For on-level learners
-   - For struggling learners
-   - For learners with special needs
+   - Support for struggling learners
+   - Extension for advanced learners
+   - Inclusive teaching approaches
+   - Special educational needs considerations
 
-8. CROSS-CUTTING ISSUES INTEGRATION
-   - Gender equality
-   - Environmental sustainability
-   - Inclusive education
-   - Sustainable development
-   - Where integrated in scheme
+8. TERM CALENDAR CONSIDERATIONS
+   - Rwanda school holidays
+   - Examination periods
+   - School events that might affect teaching
+   - Flexible planning for disruptions
 
-9. PRACTICAL ACTIVITIES
-   - Hands-on learning opportunities
-   - Group work opportunities
-   - Projects or extended tasks
-
-10. TERM OVERVIEW SUMMARY
-    - Quick reference timeline
-    - Key dates/assessments
-    - Holiday breaks
-
-Generate the scheme of work in professional, clear format ready for teacher reference and implementation throughout the term.`;
+Generate the scheme of work in professional format that teachers can follow throughout the term.`;
 };
 
 // ============================================================================
-// UTILITY FUNCTIONS
+// UNIT PLAN PROMPTS
 // ============================================================================
 
-/**
- * Helper to structure user data for better context
- */
-export const formatUserInputForPrompt = (data: Record<string, any>): string => {
-  return Object.entries(data)
-    .filter(([_, value]) => value !== null && value !== undefined && value !== '')
-    .map(([key, value]) => {
-      const readableKey = key
-        .replace(/([A-Z])/g, ' $1')
-        .replace(/^./, (str) => str.toUpperCase())
-        .trim();
-      return `${readableKey}: ${Array.isArray(value) ? value.join(', ') : value}`;
-    })
-    .join('\n');
-};
-
-/**
- * Generate a prompt with emphasis on specific requirements
- */
-export const enhancePromptWithRequirements = (
-  basePrompt: string,
-  requirements: {
-    emphasis?: string[];
-    mustInclude?: string[];
-    mustAvoid?: string[];
-    toneAndStyle?: string;
-  }
-): string => {
-  let enhancement = '';
-
-  if (requirements.emphasis?.length) {
-    enhancement += `\n\nSPECIAL EMPHASIS:\n${requirements.emphasis.map((e) => `- ${e}`).join('\n')}`;
-  }
-
-  if (requirements.mustInclude?.length) {
-    enhancement += `\n\nMUST INCLUDE:\n${requirements.mustInclude.map((i) => `- ${i}`).join('\n')}`;
-  }
-
-  if (requirements.mustAvoid?.length) {
-    enhancement += `\n\nMUST AVOID:\n${requirements.mustAvoid.map((a) => `- ${a}`).join('\n')}`;
-  }
-
-  if (requirements.toneAndStyle) {
-    enhancement += `\n\nTONE AND STYLE:\n${requirements.toneAndStyle}`;
-  }
-
-  return basePrompt + enhancement;
-};
-
-/**
- * Validate prompt before sending to AI
- */
-export const validatePromptInput = (input: Record<string, any>): { valid: boolean; errors: string[] } => {
-  const errors: string[] = [];
-  const format = input.format;
-
-  // Format-specific validation rules
-  const formatRules: Record<string, { required: string[]; optional?: string[] }> = {
-    REB: {
-      required: ['schoolName', 'subject', 'className', 'duration'],
-    },
-    RTB: {
-      required: ['instructorName', 'duration'],
-    },
-    NURSERY: {
-      required: ['schoolName', 'theme', 'teacherName', 'duration'],
-    },
-  };
-
-  if (format && formatRules[format]) {
-    const { required } = formatRules[format];
-    
-    // Check format-specific required fields
-    required.forEach((field) => {
-      if (!input[field] || (typeof input[field] === 'string' && input[field].trim() === '')) {
-        errors.push(`Required field "${field}" is missing or empty`);
-      }
-    });
-  } else {
-    // Fallback validation for unknown formats
-    const genericRequired = ['duration'];
-    genericRequired.forEach((field) => {
-      if (!input[field] || (typeof input[field] === 'string' && input[field].trim() === '')) {
-        errors.push(`Required field "${field}" is missing or empty`);
-      }
-    });
-  }
-
-  return {
-    valid: errors.length === 0,
-    errors,
-  };
-};
-
-/**
- * Create a fallback prompt if specific prompt function doesn't exist
- */
-export const createGenericPrompt = (
-  documentType: string,
-  userInputs: Record<string, any>
-): string => {
-  const systemContext = getSystemContext(documentType);
-  const formattedInputs = formatUserInputForPrompt(userInputs);
+export const generateUnitPlanPrompt = (input: {
+  unitTitle: string;
+  subject: string;
+  className: string;
+  duration: string;
+  topics: string[];
+  learningObjectives: string;
+  assessmentMethods: string;
+  resources: string;
+  additionalNotes?: string;
+}): string => {
+  const systemContext = getSystemContext('Unit Plan');
+  const instructions = getInstructions('SCHEME_OF_WORK');
+  const constraints = getConstraints();
 
   return `${systemContext}
 
+${instructions}
+
+${constraints}
+
 USER PROVIDED INFORMATION:
-${formattedInputs}
+- Unit Title: ${input.unitTitle}
+- Subject: ${input.subject}
+- Class/Grade: ${input.className}
+- Duration: ${input.duration}
+- Topics to Cover: ${input.topics.join(', ')}
+- Learning Objectives: ${input.learningObjectives}
+- Assessment Methods: ${input.assessmentMethods}
+- Resources: ${input.resources}
+${input.additionalNotes ? `- Additional Notes: ${input.additionalNotes}` : ''}
 
 TASK:
-Generate a comprehensive ${documentType} based on the information provided above.
+Generate a comprehensive unit plan using ONLY the information provided above. Structure it with:
 
-Requirements:
-1. Use ONLY the information provided
-2. Create content that is practical and implementable
-3. Align with Rwanda's education standards
-4. Include clear structure and formatting
-5. Provide actionable, specific content
+1. UNIT OVERVIEW
+   - Unit Title: ${input.unitTitle}
+   - Subject: ${input.subject}
+   - Grade Level: ${input.className}
+   - Duration: ${input.duration}
+   - Number of Topics: ${input.topics.length}
 
-Please structure the output logically with clear sections and subsections.`;
+2. UNIT RATIONALE
+   - Why this unit is important
+   - How it fits into the broader curriculum
+   - Real-world relevance and applications
+
+3. LEARNING OBJECTIVES
+   - Overall unit objectives
+   - Specific outcomes for each topic
+   - Skills development focus
+   - Competency alignment
+
+4. TOPIC BREAKDOWN
+${input.topics.map((topic, index) => `
+   **Topic ${index + 1}: ${topic}**
+   - Duration: [Allocate time within ${input.duration}]
+   - Key concepts
+   - Learning activities
+   - Assessment checkpoint`).join('')}
+
+5. TEACHING SEQUENCE
+   - Logical progression of topics
+   - Prerequisites and connections
+   - Scaffolding approach
+   - Review and reinforcement points
+
+6. ASSESSMENT PLAN
+   - Diagnostic assessment (beginning of unit)
+   - Formative assessments (during unit)
+   - Summative assessment (end of unit)
+   - Assessment methods: ${input.assessmentMethods}
+
+7. RESOURCES AND MATERIALS
+   - Essential resources: ${input.resources}
+   - Supplementary materials
+   - Technology integration
+   - Community resources (if applicable)
+
+8. DIFFERENTIATION STRATEGIES
+   - Support for diverse learners
+   - Extension activities
+   - Multiple means of engagement
+   - Accommodation strategies
+
+9. CROSS-CURRICULAR CONNECTIONS
+   - Links to other subjects
+   - Life skills integration
+   - 21st-century skills development
+   - Cultural relevance to Rwanda
+
+10. UNIT EVALUATION
+    - Success criteria
+    - Student feedback mechanisms
+    - Teacher reflection points
+    - Areas for improvement
+
+Generate the unit plan in professional format ready for teacher implementation.`;
 };
